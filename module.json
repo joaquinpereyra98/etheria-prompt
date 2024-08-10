@@ -1,8 +1,12 @@
 {
     "id": "etheria-prompt",
-    "title": "Theatre Inserts",
-    "description": "Theater Inserts with a visual novel style made for heavy roleplay scenes",
+    "title": "Etheria Prompt Module",
+    "description": "",
     "version": "1.0.0",
+    "compatibility": {
+        "minimun": "11",
+        "verified": "11"
+    },
     "authors": [
         {
             "name": "JoaquinP",
@@ -11,28 +15,11 @@
             "discord": "joaquinp98"
         }
     ],
-    "type": "module",
-    "socket": true,
-    "includes": [],
-    "media": [],
-    "languages": [],
-    "packs": [],
-    "scripts": [],
-    "esmodules": [
-        "etheria-prompt.mjs"
-    ],
-    "styles": [],
-    "compatibility": {
-        "minimum": 11,
-        "verified": 11
-    },
-    "url": "",
-    "manifest": "",
+    "url": "https://github.com/joaquinpereyra98/etheria-prompt",
     "download": "",
-    "readme": "",
-    "changelog": "",
-    "bugs": "",
-    "allowBugReporter": true,
+    "manifest": "",
+    "socket": true,
+    "readme": "README.md",
     "relationships": {
         "systems": [
             {
@@ -44,5 +31,9 @@
         ],
         "requires": [],
         "conflicts": []
-    }
+    },
+    "esmodules": [
+        "etheria-prompt.mjs"
+    ],
+    "styles": []
 }
