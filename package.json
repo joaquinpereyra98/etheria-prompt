@@ -1,0 +1,14 @@
+{
+  "name": "etheria-prompt",
+  "version": "1.0.0",
+  "main": "etheria-prompt.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "rollup": "^4.20.0"
+  }
+}
