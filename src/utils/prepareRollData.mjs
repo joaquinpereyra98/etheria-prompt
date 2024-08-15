@@ -90,7 +90,6 @@ async function rollSheetDice(
   let initrollexp = rollexp;
   let showResult = true;
   let secretconditional = false;
-  const rollModeFromUI = await this.getRollModeFromUI();
 
   if (rollexp.includes("~secretconditional~")) secretconditional = true;
   if (rollexp.includes("~blind~")) blindmode = true;
@@ -117,7 +116,6 @@ async function rollSheetDice(
 
   if (rollcitemID) linkmode = true;
 
-  let ToGM = false;
   let rolltotal = 0;
   let conditionalText = "";
 
@@ -274,18 +272,6 @@ async function rollSheetDice(
       let finalroll = await partroll.evaluate({ async: true });
 
       finalroll.extraroll = true;
-
-      if (game.dice3d != null && !nochat) {
-        //console.warn('A dice3d shown');
-        //await game.dice3d.showForRoll(partroll, game.user, true, ToGM, blindmode);
-        await this.showDice3DAnimation(
-          partroll,
-          blindmode,
-          gmmode,
-          selfmode,
-          rollModeFromUI
-        );
-      }
 
       sRoll.results = finalroll;
 
@@ -452,13 +438,6 @@ async function rollSheetDice(
           }
         }
       }
-      await this.showDice3DAnimation(
-        partroll,
-        blindmode,
-        gmmode,
-        selfmode,
-        rollModeFromUI
-      );
     }
     sRoll.results = finalroll;
     await subrolls.push(sRoll);
@@ -517,30 +496,6 @@ async function rollSheetDice(
             }
             let impRoll = new Roll(subImplodingRoll.expr);
             let impRollFinal = await impRoll.evaluate({ async: true });
-            if (game.dice3d != null && !nochat) {
-              //Dice So Nice Module
-              // change color for imploding dice
-              for (let impDie = 0; impDie < impRoll.dice.length; impDie++) {
-                impRoll.dice[impDie].options.appearance = {
-                  colorset: "custom",
-                  foreground: auxMeth.invertColor(game.user.color, true),
-                  background: game.user.color,
-                  outline: game.user.color,
-                  edge: game.user.color,
-                  texture: "cloudy",
-                  //material: "metal",
-                  //font: "Arial Black",
-                  system: "standard",
-                };
-              }
-              await this.showDice3DAnimation(
-                impRoll,
-                blindmode,
-                gmmode,
-                selfmode,
-                rollModeFromUI
-              );
-            }
             impRollFinal.extraroll = true;
             subImplodingRoll.results = impRollFinal;
             await subrolls.push(subImplodingRoll);
@@ -743,8 +698,6 @@ async function rollSheetDice(
     }
   }
 
-  if (gmmode) ToGM = ChatMessage.getWhisperRecipients("GM");
-
   //Parse Roll
   rollexp = await auxMeth.autoParser(
     rollexp,
@@ -881,15 +834,6 @@ async function rollSheetDice(
   let partroll = new Roll(rollexp);
 
   roll = await partroll.evaluate({ async: true });
-  if (game.dice3d != null && !nochat) {
-    await this.showDice3DAnimation(
-      partroll,
-      blindmode,
-      gmmode,
-      selfmode,
-      rollModeFromUI
-    );
-  }
 
   rolltotal = roll.total;
   if (this.system.mod == "" || this.system.mod == null) this.system.mod = 0;
@@ -994,7 +938,6 @@ async function rollSheetDice(
     hasCheckedForCriticalsAndFumbles = true;
   }
   if (rolldice != null) {
-    //console.log(JSON.stringify(rolldice));
     [hascrit, hasfumble] = checkRollForCritAndFumbles(
       rolldice,
       hascrit,
@@ -1119,10 +1062,14 @@ async function rollSheetDice(
     iscrit: hascrit,
     isfumble: hasfumble,
     blind: blindmode,
+    self: selfmode,
+    gmMode: gmmode,
     link: linkmode,
     rollexp: initrollexp,
     actorid: this.id,
     msgid: null,
     showresult: showResult,
+    rollModeFromUI: await this.getRollModeFromUI(),
+    rollcitemID: rollcitemID,
   };
 }

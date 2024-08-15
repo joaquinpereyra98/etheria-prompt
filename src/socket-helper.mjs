@@ -1,4 +1,5 @@
 import CONST from "./constants.mjs";
+import rollDataToMessage from "./utils/rolldataToMessage.mjs"
 
 export default class etheriaSockerHelper {
   constructor() {
@@ -44,7 +45,7 @@ export default class etheriaSockerHelper {
         rejectClose: false,
       });
       if(!isValidAttack) return;
-
+      rollDataToMessage(rollData);
     });
   }
   emit(type, payload) {
