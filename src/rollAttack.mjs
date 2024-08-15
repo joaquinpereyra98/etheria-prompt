@@ -9,13 +9,17 @@ export default async function rollAttack({ attrKey, itemName }) {
   }
   const attrID = attributes[attrKey].id;
   const rollData = await prepareRollData.call(this, attrID, attrKey);
-
-  //Emit Socket
-  game.modules
-    .get(CONST.moduleID)
-    .etheriaSockerHelper.emit(CONST.socketTypes.requestGM, {
-      actor: this,
-      rollData,
-      targets: game.user.targets
-    });
+  const socketData = {
+    user: game.user,
+    actor: this,
+    rollData,
+  }
+  const etheriaSockerHelper = game.modules.get(CONST.moduleID).etheriaSockerHelper;
+  // Check is current user it GM, if its directly run the handleRequest, else emit the socket
+  if(game.user.isGM){
+    etheriaSockerHelper.handleRequest(socketData)
+  } else {
+    //Emit Socket
+    etheriaSockerHelper.emit(CONST.socketTypes.requestGM, socketData);
+  }
 }

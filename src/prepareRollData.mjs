@@ -1,8 +1,8 @@
 import { auxMeth } from "../../../systems/sandbox/module/auxmeth.js";
 
-export default async function prepareRollData(attrID, attKey) {
+export default async function prepareRollData(propertyID, propertyKey) {
   const actorattributes = this.system.attributes;
-  const property = await auxMeth.getTElement(attrID, "property", attKey);
+  const property = await auxMeth.getTElement(propertyID, "property", propertyKey);
 
   const { rollexp, rollname, rollid } = property.system;
   const rollID = [rollid]; // Wrap rollid in an array if it isn't already

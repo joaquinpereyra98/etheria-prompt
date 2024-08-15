@@ -8,23 +8,45 @@ export default class etheriaSockerHelper {
 
   registerSocket() {
     game.socket.on(this.identifier, ({ type, payload }) => {
+      console.log(`${CONST.moduleName} | Receive Socket ${this.identifier}.${type} emit by ${payload.user.name}`);
       switch (type) {
         case CONST.socketTypes.requestGM:
-          this.#handleRequest(payload);
+          this.handleRequest(payload);
           break;
         default:
           throw new Error("Unknown socket type");
       }
     });
   }
-  #handleRequest(arg) {
-    if(game.user.isGM) {
-        
-    }
-    
+  handleRequest(data) {
+    if(!game.user.isGM) return;
+    const { actor, rollData, user } = data;
+    const targetsActor = game.users.get(user.id).targets.map(t => t.actor);
+  
+    targetsActor.forEach(async target => {
+      const isValidAttack = await Dialog.wait({
+        title: `Confirm attack roll made by ${actor.name} against ${target.name}`,
+        content: `${actor.name} realize a attack roll with a total of ${rollData.result}`,
+        buttons: {
+          confirm: {
+            label: "Confirm Roll",
+            icon: '<i class="fa-regular fa-circle-check"></i>',
+            callback: (html) => { return true }
+          },
+          reject: {
+            label: "Reject Roll",
+            icon: '<i class="fa-solid fa-ban"></i>',
+            callback: (htlm) => { return false }
+          }
+        }
+      });
+      console.log("isValidAttack:", isValidAttack); //todo delete line
+      if(!isValidAttack) return;
+
+    });
   }
   emit(type, payload) {
-    console.log(`${CONST.moduleName} | Emit Socket Module.${CONST.moduleID}.${type}`);
+    console.log(`${CONST.moduleName} | Emit Socket ${this.identifier}.${type}`);
     game.socket.emit(this.identifier, { type, payload });
   }
 }
