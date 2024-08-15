@@ -1,4 +1,4 @@
-import { auxMeth } from "../../../systems/sandbox/module/auxmeth.js";
+import { auxMeth } from "../../../../systems/sandbox/module/auxmeth.js";
 
 export default async function prepareRollData(propertyID, propertyKey) {
   const actorattributes = this.system.attributes;
