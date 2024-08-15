@@ -35,5 +35,7 @@
     "esmodules": [
         "etheria-prompt.mjs"
     ],
-    "styles": []
+    "styles": [
+        "etheria-prompt.css"
+    ]
 }

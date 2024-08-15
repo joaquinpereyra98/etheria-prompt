@@ -1,0 +1,36 @@
+/*
+*   DIALOG STYLE
+*/
+.etheria-prompt.dialog-content .dice-div{
+    margin: 4px 0;
+    border: 2px groove #eeeeee;
+    padding: 5px 2px;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+}
+.etheria-prompt.dialog-content .dice-div .die-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.etheria-prompt.dialog-content .dice-div .die-icon{
+    font-size: x-large;
+    background-image: url(../../../icons/svg/d20-grey.svg);
+    width: 40px;
+    line-height: 40px;
+    background-size: 40px;
+    display: flex;
+    justify-content: center;
+    font-weight: bold;
+}
+.etheria-prompt.dialog-content .dice-div .formula-container {
+    font-size: 15px;
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    border-left: 2px groove;
+    padding-left: 10px;
+    margin-left: 5px;
+}

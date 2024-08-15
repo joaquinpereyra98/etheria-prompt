@@ -24,9 +24,10 @@ export default class etheriaSockerHelper {
     const targetsActor = game.users.get(user.id).targets.map(t => t.actor);
   
     targetsActor.forEach(async target => {
+      const template = await renderTemplate(`modules/${CONST.moduleID}/templates/roll-dialog-template.hbs`, {...data, target});
       const isValidAttack = await Dialog.wait({
-        title: `Confirm attack roll made by ${actor.name} against ${target.name}`,
-        content: `${actor.name} realize a attack roll with a total of ${rollData.result}`,
+        title: `Attack roll made against ${target.name}`,
+        content: template,
         buttons: {
           confirm: {
             label: "Confirm Roll",
@@ -38,9 +39,10 @@ export default class etheriaSockerHelper {
             icon: '<i class="fa-solid fa-ban"></i>',
             callback: (htlm) => { return false }
           }
-        }
+        },
+        close: () => { return false },
+        rejectClose: false,
       });
-      console.log("isValidAttack:", isValidAttack); //todo delete line
       if(!isValidAttack) return;
 
     });

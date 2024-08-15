@@ -1,4 +1,4 @@
-import prepareRollData from "./utils/prepareRollData.mjsta.mjs";
+import prepareRollData from "./utils/prepareRollData.mjs";
 import CONST from "./constants.mjs";
 
 export default async function rollAttack({ attrKey, itemName }) {
