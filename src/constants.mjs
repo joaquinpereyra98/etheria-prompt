@@ -21,6 +21,10 @@ CONST.reactionOption = {
   dodge: {
     label: "Dodge",
     icon: `modules/${CONST.moduleID}/asset/wingfoot.svg`
+  },
+  agi: { //TODO delete this option
+    label: "Agi",
+    icon: `modules/${CONST.moduleID}/asset/wingfoot.svg`
   }
 }
 export default CONST;

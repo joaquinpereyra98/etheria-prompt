@@ -17,6 +17,7 @@ export default async function rollAttack({ attrKey, itemName }) {
     user: game.user,
     actor: this,
     rollData,
+    itemName
   }
   const etheriaSockerHelper = game.modules.get(CONST.moduleID).etheriaSockerHelper;
   // Check is current user it GM, if its directly run the handleRequest, else emit the socket

@@ -6,7 +6,7 @@
             <img src="{{option.icon}}">
             <div>
                 <span>{{option.label}}</span>
-                <input type="radio" name="reactionOption" value="{{key}}" checked>
+                <input type="radio" name="reactionOption" value="{{key}}" {{checked (eq 'none' key)}}>
             </div>
         </div>
         {{/each}}
