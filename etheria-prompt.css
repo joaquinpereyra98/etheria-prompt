@@ -1,9 +1,12 @@
 /*
 *   DIALOG STYLE
 */
+.etheria-prompt {
+    --groove-border: groove #eeeeee;
+}
 .etheria-prompt.dialog-content .dice-div{
     margin: 4px 0;
-    border: 2px groove #eeeeee;
+    border: 2px var(--groove-border);
     padding: 5px 2px;
     background: rgba(255,255,255,0.2);
     display: flex;
@@ -30,7 +33,37 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    border-left: 2px groove;
+    border-left: 2px var(--groove-border);
     padding-left: 10px;
     margin-left: 5px;
+}
+.etheria-prompt.dialog-content .etheria-checkbox {
+    display: flex;
+    align-items: center;
+    border: 2px var(--groove-border);
+    position: relative;
+    margin: 2px 0;
+}
+.etheria-prompt.dialog-content .etheria-checkbox:hover {
+    background: rgba(0,0,0,0.1);
+}
+.etheria-prompt.dialog-content .etheria-checkbox img {
+    width: 30px;
+    border: 0;
+}
+.etheria-prompt.dialog-content .etheria-checkbox div {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 8px;
+    margin: 0 2px;
+    border-left: 2px var(--groove-border);
+}
+.etheria-prompt.dialog-content .etheria-checkbox span {
+    font-size: 17px;
+}
+.etheria-prompt.dialog-content .etheria-checkbox input[type=radio] {
+    height: 17px;
+    width: 15px;
+    cursor: pointer;
 }

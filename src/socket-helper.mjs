@@ -21,7 +21,7 @@ export default class etheriaSockerHelper {
   }
   handleRequest(data) {
     if(!game.user.isGM) return;
-    const { actor, rollData, user } = data;
+    const { actor, rollData: attackRollAttack, user } = data;
     const targetsActor = game.users.get(user.id).targets.map(t => t.actor);
   
     targetsActor.forEach(async target => {
@@ -45,7 +45,17 @@ export default class etheriaSockerHelper {
         rejectClose: false,
       });
       if(!isValidAttack) return;
-      rollDataToMessage(rollData);
+      rollDataToMessage(attackRollAttack);
+      const reactionDialogContent = await renderTemplate(`modules/${CONST.moduleID}/templates/reaction-dialog-template.hbs`, {target, reactionOption: CONST.reactionOption})
+      const reaction = await Dialog.prompt({
+        title: `Choose the reaction of ${target.name}`,
+        content: reactionDialogContent,
+        label: "Roll",
+        callback: (html) => {
+          return html.find("input[name=reactionOption]:checked").val()
+        },
+        rejectClose: false
+      })
     });
   }
   emit(type, payload) {

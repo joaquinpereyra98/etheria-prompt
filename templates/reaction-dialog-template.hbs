@@ -1,0 +1,14 @@
+<div class="etheria-prompt dialog-content">
+    <span>Chosse the reaction of <b>{{target.name}}</b> against the attack:</b></span>
+    <div class="options-container">
+        {{#each reactionOption as |option key|}}
+        <div class="etheria-checkbox">
+            <img src="{{option.icon}}">
+            <div>
+                <span>{{option.label}}</span>
+                <input type="radio" name="reactionOption" value="{{key}}" checked>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+</div>
