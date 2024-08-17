@@ -32,6 +32,11 @@ export default class etheriaSockerHelper {
     const { actor, rollData: attackRollAttack, user, itemName } = data;
     const targetsActor = game.users.get(user.id).targets.map((t) => t.actor);
 
+    const { useData, rollDamageData } = await prepareRollDamageData(
+      actor,
+      itemName
+    );
+
     targetsActor.forEach(async (target) => {
       const targetAttributes = target.system.attributes;
       //Request if attack roll is valid.
@@ -65,10 +70,7 @@ export default class etheriaSockerHelper {
         if (!targetDodged) return;
         await rollDataToMessage(reactionRollData);
       }
-      const { useData, rollDamageData } = await prepareRollDamageData(
-        actor,
-        itemName
-      );
+      
       const item = game.system.api.ActorcItem_GetFromName(actor, itemName);
       const citem = await auxMeth.getcItem(item.id, item.ciKey);
       const damageType = citem.system.attributes.damageType.value
@@ -81,21 +83,29 @@ export default class etheriaSockerHelper {
         );
         return;
       }
-      await rollDataToMessage(rollDamageData);
+
       let realDamage =
         Math.floor(rollDamageData.result * (resistanceAttribute.value / 100));
+
+        //If the damage is physical, subtracts the armor  
       if (["bludgeoning", "piercing", "slashing"].includes(damageType))
-        realDamage -= targetAttributes.armorkeytest.value;
-      actor.sheet.activateCI(
-        useData.id,
-        useData.value,
-        useData.iscon,
-        rollDamageData.result
-      );
+        realDamage -= targetAttributes.armorkeytest.value;  
+
+      //Update  target actor
       await target.update({
         "system.attributes.hp.value": targetAttributes.hp.value - realDamage,
       });
     });
+
+    //Create Damage Message
+    await rollDataToMessage(rollDamageData);
+    //Active Item
+    await actor.sheet.activateCI(
+      useData.id,
+      useData.value,
+      useData.iscon,
+      rollDamageData.result
+    );
   }
   emit(type, payload) {
     console.log(`${CONST.moduleName} | Emit Socket ${this.identifier}.${type}`);
