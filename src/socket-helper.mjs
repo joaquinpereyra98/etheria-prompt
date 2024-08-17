@@ -1,7 +1,11 @@
 import CONST from "./constants.mjs";
 import rollDataToMessage from "./utils/rolldataToMessage.mjs";
-import prepareRollData from "./utils/prepareRollData.mjs";
+import {
+  prepareRollData,
+  prepareRollDamageData,
+} from "./utils/prepareRollData.mjs";
 import requestDialog from "./utils/requestDialog.mjs";
+import { auxMeth } from "../../../../systems/sandbox/module/auxmeth.js";
 
 export default class etheriaSockerHelper {
   constructor() {
@@ -23,7 +27,7 @@ export default class etheriaSockerHelper {
       }
     });
   }
-  handleRequest(data) {
+  async handleRequest(data) {
     if (!game.user.isGM) return;
     const { actor, rollData: attackRollAttack, user, itemName } = data;
     const targetsActor = game.users.get(user.id).targets.map((t) => t.actor);
@@ -56,7 +60,8 @@ export default class etheriaSockerHelper {
       if (!reactionKey) return;
 
       //If reaction selected was Block, Dodge or Parry calc the reactionRoll and ask if hit or not.
-      if (["block", "parrry", "dodge", "agi"].includes(reactionKey)) { //TODO delete agi
+      if (["block", "parrry", "dodge", "agi"].includes(reactionKey)) {
+        //TODO delete agi
         const attrID = target.system.attributes[reactionKey].id;
         const reactionRollData = await prepareRollData.call(
           target,
@@ -67,9 +72,31 @@ export default class etheriaSockerHelper {
           targetName: target.name,
           reactionKey: reactionKey.capitalize(),
         });
-        console.log(targetDodged) //TODO delete
         //If GM select dont apply damage, dont rollDamage.
         if (!targetDodged) return;
+        const { useData, rollDamageData } = await prepareRollDamageData(
+          actor,
+          itemName
+        );
+        const item = game.system.api.ActorcItem_GetFromName(actor, itemName);
+        const citem = await auxMeth.getcItem(item.id, item.ciKey);
+        const damageType = citem.system.attributes.damageType.value
+          ?.toLowerCase()
+          .trim();
+        const resistanceAttribute = target.system.attributes[`${damageType}resistance`]
+        if (
+          !damageType ||
+          !resistanceAttribute
+        ) {
+          ui.notifications.error(
+            `${CONST.moduleName} | Error executing Actor#rollAttack | damageType ${damageType} property is invalid`
+          );
+          return;
+        }
+        let realDamage = rollDamageData.result * (resistanceAttribute.value/100);
+        if(["bludgeoning", "piercing","slashing"].includes(damageType)) realDamage-=target.system.attributes.armorkeytest.value;
+        actor.sheet.activateCI(useData.id, useData.value, useData.iscon, rollDamageData.result);
+        await target.update({'system.attribute.hp': realDamage});
       }
     });
   }
