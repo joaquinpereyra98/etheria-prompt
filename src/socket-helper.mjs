@@ -33,6 +33,7 @@ export default class etheriaSockerHelper {
     const targetsActor = game.users.get(user.id).targets.map((t) => t.actor);
 
     targetsActor.forEach(async (target) => {
+      const targetAttributes = target.system.attributes;
       //Request if attack roll is valid.
       const isValidAttack = await requestDialog(attackRollAttack, "Attack", {
         targetName: target.name,
@@ -41,16 +42,16 @@ export default class etheriaSockerHelper {
 
       if (!isValidAttack) return;
 
-      rollDataToMessage(attackRollAttack);
+      await rollDataToMessage(attackRollAttack);
       const reactionKey = await this.#createReactionDialog(target);
 
       //if GM close the reacton dialog, dont roll damage.
       if (!reactionKey) return;
 
       //If reaction selected was Block, Dodge or Parry calc the reactionRoll and ask if hit or not.
-      if (["block", "parrry", "dodge", "agi"].includes(reactionKey)) {
+      if (["block", "parry", "dodge"].includes(reactionKey)) {
         //TODO delete agi
-        const attrID = target.system.attributes[reactionKey].id;
+        const attrID = targetAttributes[reactionKey].id;
         const reactionRollData = await prepareRollData.call(
           target,
           attrID,
@@ -62,30 +63,38 @@ export default class etheriaSockerHelper {
         });
         //If GM select dont apply damage, dont rollDamage.
         if (!targetDodged) return;
-        const { useData, rollDamageData } = await prepareRollDamageData(
-          actor,
-          itemName
-        );
-        const item = game.system.api.ActorcItem_GetFromName(actor, itemName);
-        const citem = await auxMeth.getcItem(item.id, item.ciKey);
-        const damageType = citem.system.attributes.damageType.value
-          ?.toLowerCase()
-          .trim();
-        const resistanceAttribute = target.system.attributes[`${damageType}resistance`]
-        if (
-          !damageType ||
-          !resistanceAttribute
-        ) {
-          ui.notifications.error(
-            `${CONST.moduleName} | Error executing Actor#rollAttack | damageType ${damageType} property is invalid`
-          );
-          return;
-        }
-        let realDamage = rollDamageData.result * (resistanceAttribute.value/100);
-        if(["bludgeoning", "piercing","slashing"].includes(damageType)) realDamage-=target.system.attributes.armorkeytest.value;
-        actor.sheet.activateCI(useData.id, useData.value, useData.iscon, rollDamageData.result);
-        await target.update({'system.attribute.hp': realDamage});
+        await rollDataToMessage(reactionRollData);
       }
+      const { useData, rollDamageData } = await prepareRollDamageData(
+        actor,
+        itemName
+      );
+      const item = game.system.api.ActorcItem_GetFromName(actor, itemName);
+      const citem = await auxMeth.getcItem(item.id, item.ciKey);
+      const damageType = citem.system.attributes.damageType.value
+        ?.toLowerCase()
+        .trim();
+      const resistanceAttribute = targetAttributes[`${damageType}resistance`];
+      if (!damageType || !resistanceAttribute) {
+        ui.notifications.error(
+          `${CONST.moduleName} | Error executing Actor#rollAttack | damageType ${damageType} property is invalid`
+        );
+        return;
+      }
+      await rollDataToMessage(rollDamageData);
+      let realDamage =
+        Math.floor(rollDamageData.result * (resistanceAttribute.value / 100));
+      if (["bludgeoning", "piercing", "slashing"].includes(damageType))
+        realDamage -= targetAttributes.armorkeytest.value;
+      actor.sheet.activateCI(
+        useData.id,
+        useData.value,
+        useData.iscon,
+        rollDamageData.result
+      );
+      await target.update({
+        "system.attributes.hp.value": targetAttributes.hp.value - realDamage,
+      });
     });
   }
   emit(type, payload) {
@@ -93,7 +102,7 @@ export default class etheriaSockerHelper {
     game.socket.emit(this.identifier, { type, payload });
   }
   async #createReactionDialog(target) {
-    const reactionDialogContent =  await renderTemplate(
+    const reactionDialogContent = await renderTemplate(
       `modules/${CONST.moduleID}/templates/reaction-dialog-template.hbs`,
       { target, reactionOption: CONST.reactionOption }
     );
@@ -107,10 +116,10 @@ export default class etheriaSockerHelper {
       },
       rejectClose: false,
       render: (html) => {
-        html.find('.etheria-checkbox').click((ev) => {
-          $(ev.currentTarget).find('input[type="radio"]').prop('checked', true)
-        })
-      }
+        html.find(".etheria-checkbox").click((ev) => {
+          $(ev.currentTarget).find('input[type="radio"]').prop("checked", true);
+        });
+      },
     });
   }
 }
