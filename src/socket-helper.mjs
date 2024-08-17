@@ -42,19 +42,7 @@ export default class etheriaSockerHelper {
       if (!isValidAttack) return;
 
       rollDataToMessage(attackRollAttack);
-      const reactionDialogContent = await renderTemplate(
-        `modules/${CONST.moduleID}/templates/reaction-dialog-template.hbs`,
-        { target, reactionOption: CONST.reactionOption }
-      );
-      const reactionKey = await Dialog.prompt({
-        title: `Choose the reaction of ${target.name}`,
-        content: reactionDialogContent,
-        label: "Roll",
-        callback: (html) => {
-          return html.find("input[name=reactionOption]:checked").val();
-        },
-        rejectClose: false,
-      });
+      const reactionKey = await this.#createReactionDialog(target);
 
       //if GM close the reacton dialog, dont roll damage.
       if (!reactionKey) return;
@@ -103,5 +91,26 @@ export default class etheriaSockerHelper {
   emit(type, payload) {
     console.log(`${CONST.moduleName} | Emit Socket ${this.identifier}.${type}`);
     game.socket.emit(this.identifier, { type, payload });
+  }
+  async #createReactionDialog(target) {
+    const reactionDialogContent =  await renderTemplate(
+      `modules/${CONST.moduleID}/templates/reaction-dialog-template.hbs`,
+      { target, reactionOption: CONST.reactionOption }
+    );
+
+    return await Dialog.prompt({
+      title: `Choose the reaction of ${target.name}`,
+      content: reactionDialogContent,
+      label: "Roll",
+      callback: (html) => {
+        return html.find("input[name=reactionOption]:checked").val();
+      },
+      rejectClose: false,
+      render: (html) => {
+        html.find('.etheria-checkbox').click((ev) => {
+          $(ev.currentTarget).find('input[type="radio"]').prop('checked', true)
+        })
+      }
+    });
   }
 }
