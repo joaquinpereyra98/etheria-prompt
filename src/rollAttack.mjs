@@ -14,8 +14,8 @@ export default async function rollAttack({ attrKey, itemName }) {
     return;
   }
   const socketData = {
-    user: game.user,
-    actor: this,
+    userUuid: game.user.uuid,
+    actorUuid: this.uuid,
     rollData,
     itemName
   }

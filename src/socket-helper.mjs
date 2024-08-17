@@ -16,7 +16,7 @@ export default class etheriaSockerHelper {
   registerSocket() {
     game.socket.on(this.identifier, ({ type, payload }) => {
       console.log(
-        `${CONST.moduleName} | Receive Socket ${this.identifier}.${type} emit by ${payload.user.name}`
+        `${CONST.moduleName} | Receive Socket ${this.identifier}.${type} emit by ${payload.userUuid}`
       );
       switch (type) {
         case CONST.socketTypes.requestGM:
@@ -29,15 +29,15 @@ export default class etheriaSockerHelper {
   }
   async handleRequest(data) {
     if (!game.user.isGM) return;
-    const { actor, rollData: attackRollAttack, user, itemName } = data;
-    const targetsActor = game.users.get(user.id).targets.map((t) => t.actor);
-
+    const { actorUuid, rollData: attackRollAttack, userUuid, itemName } = data;
+    const actor = await fromUuid(actorUuid);
+    const user = await fromUuid(userUuid);
+    const targetsActor = game.users.get(user._id).targets.map((t) => t.actor);
     const { useData, rollDamageData } = await prepareRollDamageData(
       actor,
       itemName
     );
-
-    targetsActor.forEach(async (target) => {
+    for (const target of targetsActor) {
       const targetAttributes = target.system.attributes;
       //Request if attack roll is valid.
       const isValidAttack = await requestDialog(attackRollAttack, "Attack", {
@@ -70,7 +70,7 @@ export default class etheriaSockerHelper {
         if (!targetDodged) return;
         await rollDataToMessage(reactionRollData);
       }
-      
+
       const item = game.system.api.ActorcItem_GetFromName(actor, itemName);
       const citem = await auxMeth.getcItem(item.id, item.ciKey);
       const damageType = citem.system.attributes.damageType.value
@@ -84,19 +84,19 @@ export default class etheriaSockerHelper {
         return;
       }
 
-      let realDamage =
-        Math.floor(rollDamageData.result * (resistanceAttribute.value / 100));
+      let realDamage = Math.floor(
+        rollDamageData.result * (resistanceAttribute.value / 100)
+      );
 
-        //If the damage is physical, subtracts the armor  
+      //If the damage is physical, subtracts the armor
       if (["bludgeoning", "piercing", "slashing"].includes(damageType))
-        realDamage -= targetAttributes.armorkeytest.value;  
+        realDamage -= targetAttributes.armorkeytest.value;
 
       //Update  target actor
       await target.update({
         "system.attributes.hp.value": targetAttributes.hp.value - realDamage,
       });
-    });
-
+    }
     //Create Damage Message
     await rollDataToMessage(rollDamageData);
     //Active Item
