@@ -1099,5 +1099,6 @@ async function rollSheetDice(
     showresult: showResult,
     rollModeFromUI: await this.getRollModeFromUI(),
     rollcitemID: rollcitemID,
+    roll: roll,
   };
 }

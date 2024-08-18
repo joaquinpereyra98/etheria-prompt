@@ -29,9 +29,10 @@ export default class etheriaSockerHelper {
   }
   async handleRequest(data) {
     if (!game.user.isGM) return;
-    const { actorUuid, rollData: attackRollAttack, userUuid, itemName } = data;
+    const { actorUuid, attrID, attrKey, userUuid, itemName } = data;
     const actor = await fromUuid(actorUuid);
     const user = await fromUuid(userUuid);
+    const attackRollData = await prepareRollData.call(actor, attrID, attrKey);
     const targetsActor = game.users.get(user._id).targets.map((t) => t.actor);
     const { useData, rollDamageData } = await prepareRollDamageData(
       actor,
@@ -40,14 +41,13 @@ export default class etheriaSockerHelper {
     for (const target of targetsActor) {
       const targetAttributes = target.system.attributes;
       //Request if attack roll is valid.
-      const isValidAttack = await requestDialog(attackRollAttack, "Attack", {
+      const isValidAttack = await requestDialog(attackRollData, "Attack", {
         targetName: target.name,
         actorName: actor.name,
       });
 
       if (!isValidAttack) return;
-
-      await rollDataToMessage(attackRollAttack);
+      await rollDataToMessage(actor, user, attackRollData);
       const reactionKey = await this.#createReactionDialog(target);
 
       //if GM close the reacton dialog, dont roll damage.
@@ -68,7 +68,7 @@ export default class etheriaSockerHelper {
         });
         //If GM select dont apply damage, dont rollDamage.
         if (!targetDodged) return;
-        await rollDataToMessage(reactionRollData);
+        await rollDataToMessage(target, game.user ,reactionRollData);
       }
 
       const item = game.system.api.ActorcItem_GetFromName(actor, itemName);
@@ -98,7 +98,7 @@ export default class etheriaSockerHelper {
       });
     }
     //Create Damage Message
-    await rollDataToMessage(rollDamageData);
+    await rollDataToMessage(actor, user, rollDamageData);
     //Active Item
     await actor.sheet.activateCI(
       useData.id,

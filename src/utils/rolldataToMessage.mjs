@@ -1,71 +1,62 @@
 import { auxMeth } from "../../../../systems/sandbox/module/auxmeth.js";
 
-export default async function rollDataToMessage(rollData) {
+export default async function rollDataToMessage(actor, user, rollData) {
+  rollData.user = user.name;
   let newhtml = await renderTemplate(
     "systems/sandbox/templates/dice.html",
     rollData
   );
-  let rtypevalue = "";
-  if (rollData.gmMode || rollData.blid || rollData.self) {
-    if (rollData.gmMode) {
-      rtypevalue = CONST.DICE_ROLL_MODES.PRIVATE;
-    } else if (rollData.blid) {
-      rtypevalue = CONST.DICE_ROLL_MODES.BLIND;
-    } else if (rollData.self) {
-      rtypevalue = CONST.DICE_ROLL_MODES.SELF;
-    }
-  } else {
-    rtypevalue = rollData.rollModeFromUI;
-  }
-  if (rtypevalue == "") {
-    // still no roll mode found
-    // set default to public roll
-    rtypevalue = CONST.DICE_ROLL_MODES.PUBLIC;
-  }
+  const rtypevalue = getDiceMode(rollData)
 
-  let rvalue = CONST.CHAT_MESSAGE_TYPES.OTHER;
-  switch (
-    rtypevalue //roll, gmroll,blindroll,selfroll
-  ) {
-    case CONST.DICE_ROLL_MODES.PUBLIC:
-      rvalue = CONST.CHAT_MESSAGE_TYPES.IC;
-      break;
-    case CONST.DICE_ROLL_MODES.PRIVATE:
-      rvalue = CONST.CHAT_MESSAGE_TYPES.WHISPER;
-      break;
-    case CONST.DICE_ROLL_MODES.BLIND:
-      rvalue = CONST.CHAT_MESSAGE_TYPES.WHISPER;
-      blindmode = true;
-      break;
-    case CONST.DICE_ROLL_MODES.SELF:
-      rvalue = CONST.CHAT_MESSAGE_TYPES.WHISPER;
-      break;
-    default:
-  }
+  const {rvalue, whisper} = getValues(user, rtypevalue);
 
   const wrapper = document.createElement("div");
   wrapper.innerHTML = newhtml;
   let cilink = wrapper.querySelector(".roll-citemlink");
 
-  if (cilink != null) cilink.setAttribute("id", rollData.rollcitemID);
+  if (cilink) cilink.setAttribute("id", rollData.rollcitemID);
 
-  const actor = game.actors.get(rollData.actorid)
+  const item = game.items.find(i => i._id === rollData.rollcitemID);
   const messageData = {
     speaker: ChatMessage.getSpeaker({actor}),
     content: wrapper.innerHTML,
     type: rvalue,
     blind: rollData.blindmode,
+    flags: { itemId: rollData.rollcitemID, item: item, itemName: item?.name}
   };
 
-  if (
-    rtypevalue == CONST.DICE_ROLL_MODES.PRIVATE ||
-    rtypevalue == CONST.DICE_ROLL_MODES.BLIND
-  ) {
-    messageData.whisper = ChatMessage.getWhisperRecipients("GM");
-  } else if (rtypevalue == CONST.DICE_ROLL_MODES.SELF) {
-    messageData.whisper = ChatMessage.getWhisperRecipients(game.user.name);
-  }
+  if (whisper) messageData.whisper = whisper;
+
   const newmessage = await ChatMessage.create(messageData);
+  if(game.dice3d) {
+    await game.dice3d.showForRoll(rollData.roll, user, true, messageData.whisper, rollData.blindmode)
+  }
   rollData.msgid = newmessage.id;
   auxMeth.rollToMenu(newhtml);
+}
+function getDiceMode({gmMode, blid, self, rollModeFromUI}){
+  if(gmMode) return CONST.DICE_ROLL_MODES.PRIVATE;
+  if(blid) return CONST.DICE_ROLL_MODES.BLIND;
+  if(self) return CONST.DICE_ROLL_MODES.SELF;
+  return rollModeFromUI || CONST.DICE_ROLL_MODES.PUBLIC;
+}
+function getValues(user, rtypevalue){
+  let rvalue;
+  let whisper;
+  switch (rtypevalue) {
+    case CONST.DICE_ROLL_MODES.PUBLIC:
+      rvalue = CONST.CHAT_MESSAGE_TYPES.IC;
+      break;
+    case CONST.DICE_ROLL_MODES.PRIVATE:
+    case CONST.DICE_ROLL_MODES.BLIND:
+      rvalue = CONST.CHAT_MESSAGE_TYPES.WHISPER;
+      whisper = ChatMessage.getWhisperRecipients("GM");
+    case CONST.DICE_ROLL_MODES.SELF:
+      whisper = ChatMessage.getWhisperRecipients(user);
+      rvalue = CONST.CHAT_MESSAGE_TYPES.WHISPER;
+      break;
+    default:
+      rvalue = CONST.CHAT_MESSAGE_TYPES.OTHER;
+  }
+  return {rvalue , whisper}
 }

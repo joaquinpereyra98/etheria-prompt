@@ -7,8 +7,6 @@ export default async function rollAttack({ attrKey, itemName }) {
     ui.notifications.error(`${CONST.moduleName} | Error executing Actor#rollAttack | "${attrKey}" not is a valid attribute key`);
     return;
   }
-  const attrID = attributes[attrKey].id;
-  const rollData = await prepareRollData.call(this, attrID, attrKey);
   if(game.user.targets.size === 0){
     ui.notifications.error(`${CONST.moduleName} | Error executing Actor#rollAttack | You must select one or more targets`);
     return;
@@ -16,7 +14,8 @@ export default async function rollAttack({ attrKey, itemName }) {
   const socketData = {
     userUuid: game.user.uuid,
     actorUuid: this.uuid,
-    rollData,
+    attrID: attributes[attrKey].id,
+    attrKey,
     itemName
   }
   const etheriaSockerHelper = game.modules.get(CONST.moduleID).etheriaSockerHelper;
