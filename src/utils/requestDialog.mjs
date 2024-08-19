@@ -1,4 +1,4 @@
-import CONST from '../constants.mjs';
+import ETHERIA_CONST from '../constants.mjs';
 
 export default async function requestDialog(rollData, requestType, options = {}) {
   const dialogOptions = {
@@ -17,7 +17,7 @@ export default async function requestDialog(rollData, requestType, options = {})
   }[requestType];
 
   const template = await renderTemplate(
-    `modules/${CONST.moduleID}/templates/roll-dialog-template.hbs`,
+    `modules/${ETHERIA_CONST.moduleID}/templates/roll-dialog-template.hbs`,
     { rollData, labelDialog: dialogOptions.label }
   );
 

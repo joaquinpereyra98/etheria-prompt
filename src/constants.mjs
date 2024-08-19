@@ -1,26 +1,27 @@
-const CONST = {
+const ETHERIA_CONST = {
   moduleID: "etheria-prompt",
   moduleName: "Etheria Prompt Module",
   socketTypes: {
     requestGM: "REQUEST_GM",
+    createMsg: "CREATE_MSG"
   },
 };
-CONST.reactionOption = {
+ETHERIA_CONST.reactionOption = {
   none: {
     label: "None",
-    icon: `modules/${CONST.moduleID}/asset/circle.svg`
+    icon: `modules/${ETHERIA_CONST.moduleID}/asset/circle.svg`
   },
   parry: {
     label: "Parry",
-    icon: `modules/${CONST.moduleID}/asset/sword-clash.svg`
+    icon: `modules/${ETHERIA_CONST.moduleID}/asset/sword-clash.svg`
   },
   block: {
     label: "Block",
-    icon: `modules/${CONST.moduleID}/asset/shield.svg`
+    icon: `modules/${ETHERIA_CONST.moduleID}/asset/shield.svg`
   },
   dodge: {
     label: "Dodge",
-    icon: `modules/${CONST.moduleID}/asset/wingfoot.svg`
+    icon: `modules/${ETHERIA_CONST.moduleID}/asset/wingfoot.svg`
   },
 }
-export default CONST;
+export default ETHERIA_CONST;

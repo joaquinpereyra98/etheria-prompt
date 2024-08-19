@@ -1,4 +1,4 @@
-import CONST from "./constants.mjs";
+import ETHERIA_CONST from "./constants.mjs";
 import rollDataToMessage from "./utils/rolldataToMessage.mjs";
 import {
   prepareRollData,
@@ -9,18 +9,22 @@ import { auxMeth } from "../../../../systems/sandbox/module/auxmeth.js";
 
 export default class etheriaSockerHelper {
   constructor() {
-    this.identifier = `module.${CONST.moduleID}`;
+    this.identifier = `module.${ETHERIA_CONST.moduleID}`;
     this.registerSocket();
   }
 
   registerSocket() {
     game.socket.on(this.identifier, ({ type, payload }) => {
       console.log(
-        `${CONST.moduleName} | Receive Socket ${this.identifier}.${type} emit by ${payload.userUuid}`
+        `${ETHERIA_CONST.moduleName} | Receive Socket ${this.identifier}.${type} emit by ${payload.userUuid}`
       );
       switch (type) {
-        case CONST.socketTypes.requestGM:
+        case ETHERIA_CONST.socketTypes.requestGM:
           this.handleRequest(payload);
+          break;
+        case ETHERIA_CONST.socketTypes.createMsg:
+          console.log(payload)
+          this.createMsg(payload);
           break;
         default:
           throw new Error("Unknown socket type");
@@ -41,13 +45,14 @@ export default class etheriaSockerHelper {
     for (const target of targetsActor) {
       const targetAttributes = target.system.attributes;
       //Request if attack roll is valid.
+      await rollDataToMessage(actor, user, attackRollData);
       const isValidAttack = await requestDialog(attackRollData, "Attack", {
         targetName: target.name,
         actorName: actor.name,
       });
 
       if (!isValidAttack) return;
-      await rollDataToMessage(actor, user, attackRollData);
+      
       const reactionKey = await this.#createReactionDialog(target);
 
       //if GM close the reacton dialog, dont roll damage.
@@ -79,7 +84,7 @@ export default class etheriaSockerHelper {
       const resistanceAttribute = targetAttributes[`${damageType}resistance`];
       if (!damageType || !resistanceAttribute) {
         ui.notifications.error(
-          `${CONST.moduleName} | Error executing Actor#rollAttack | damageType ${damageType} property is invalid`
+          `${ETHERIA_CONST.moduleName} | Error executing Actor#rollAttack | damageType ${damageType} property is invalid`
         );
         return;
       }
@@ -107,14 +112,21 @@ export default class etheriaSockerHelper {
       rollDamageData.result
     );
   }
+  async createMsg(data) {
+    const { user, messageData } = data;
+    console.log(user, messageData)
+    if(game.user.id === user._id){
+      await ChatMessage.create(messageData);
+    }
+  }
   emit(type, payload) {
-    console.log(`${CONST.moduleName} | Emit Socket ${this.identifier}.${type}`);
+    console.log(`${ETHERIA_CONST.moduleName} | Emit Socket ${this.identifier}.${type}`);
     game.socket.emit(this.identifier, { type, payload });
   }
   async #createReactionDialog(target) {
     const reactionDialogContent = await renderTemplate(
-      `modules/${CONST.moduleID}/templates/reaction-dialog-template.hbs`,
-      { target, reactionOption: CONST.reactionOption }
+      `modules/${ETHERIA_CONST.moduleID}/templates/reaction-dialog-template.hbs`,
+      { target, reactionOption: ETHERIA_CONST.reactionOption }
     );
 
     return await Dialog.prompt({
@@ -130,6 +142,9 @@ export default class etheriaSockerHelper {
           $(ev.currentTarget).find('input[type="radio"]').prop("checked", true);
         });
       },
+      options: {
+        height: 267
+      }
     });
   }
 }

@@ -1,4 +1,5 @@
 import { auxMeth } from "../../../../systems/sandbox/module/auxmeth.js";
+import ETHERIA_CONST from "../constants.mjs";
 
 export default async function rollDataToMessage(actor, user, rollData) {
   rollData.user = user.name;
@@ -27,11 +28,16 @@ export default async function rollDataToMessage(actor, user, rollData) {
 
   if (whisper) messageData.whisper = whisper;
 
-  const newmessage = await ChatMessage.create(messageData);
+  const { etheriaSockerHelper } = game.modules.get(ETHERIA_CONST.moduleID)
+  if(user.id === game.user.id){
+    etheriaSockerHelper.createMsg({ messageData, user });
+  } else{
+    etheriaSockerHelper.emit(ETHERIA_CONST.socketTypes.createMsg, { messageData, user });
+  }
+
   if(game.dice3d) {
     await game.dice3d.showForRoll(rollData.roll, user, true, messageData.whisper, rollData.blindmode)
   }
-  rollData.msgid = newmessage.id;
   auxMeth.rollToMenu(newhtml);
 }
 function getDiceMode({gmMode, blid, self, rollModeFromUI}){
