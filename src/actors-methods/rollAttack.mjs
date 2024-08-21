@@ -1,4 +1,4 @@
-import ETHERIA_CONST from "./constants.mjs";
+import ETHERIA_CONST from "../constants.mjs";
 
 export default async function rollAttack(attrKey, itemName) {
   const { attributes } = this.system;

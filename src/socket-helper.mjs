@@ -23,7 +23,7 @@ export default class etheriaSockerHelper {
           this.handleRequest(payload);
           break;
         case ETHERIA_CONST.socketTypes.createMsg:
-          console.log(payload)
+          console.log(payload);
           this.createMsg(payload);
           break;
         default:
@@ -52,7 +52,7 @@ export default class etheriaSockerHelper {
       });
 
       if (!isValidAttack) return;
-      
+
       const reactionKey = await this.#createReactionDialog(target);
 
       //if GM close the reacton dialog, dont roll damage.
@@ -73,7 +73,7 @@ export default class etheriaSockerHelper {
         });
         //If GM select dont apply damage, dont rollDamage.
         if (!targetDodged) return;
-        await rollDataToMessage(target, game.user ,reactionRollData);
+        await rollDataToMessage(target, game.user, reactionRollData);
       }
 
       const item = game.system.api.ActorcItem_GetFromName(actor, itemName);
@@ -114,13 +114,15 @@ export default class etheriaSockerHelper {
   }
   async createMsg(data) {
     const { user, messageData } = data;
-    console.log(user, messageData)
-    if(game.user.id === user._id){
+    console.log(user, messageData);
+    if (game.user.id === user._id) {
       await ChatMessage.create(messageData);
     }
   }
   emit(type, payload) {
-    console.log(`${ETHERIA_CONST.moduleName} | Emit Socket ${this.identifier}.${type}`);
+    console.log(
+      `${ETHERIA_CONST.moduleName} | Emit Socket ${this.identifier}.${type}`
+    );
     game.socket.emit(this.identifier, { type, payload });
   }
   async #createReactionDialog(target) {
@@ -143,8 +145,8 @@ export default class etheriaSockerHelper {
         });
       },
       options: {
-        height: 267
-      }
+        height: 267,
+      },
     });
   }
 }

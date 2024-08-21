@@ -1,5 +1,5 @@
 import ETHERIA_CONST from "./src/constants.mjs";
-import rollAttack from "./src/rollAttack.mjs";
+import rollAttack from "./src/actors-methods/rollAttack.mjs";
 import etheriaSockerHelper from "./src/socket-helper.mjs";
 
 Hooks.on("init", () => {
