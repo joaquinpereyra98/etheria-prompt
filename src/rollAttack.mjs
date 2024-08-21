@@ -1,6 +1,6 @@
 import ETHERIA_CONST from "./constants.mjs";
 
-export default async function rollAttack({ attrKey, itemName }) {
+export default async function rollAttack(attrKey, itemName) {
   const { attributes } = this.system;
   if (!typeof attrKey === "string" || !attributes[attrKey]) {
     ui.notifications.error(`${ETHERIA_CONST.moduleName} | Error executing Actor#rollAttack | "${attrKey}" not is a valid attribute key`);
