@@ -68,32 +68,12 @@ export default async function onRollAttack(
     }
 
     //ROLL DAMAGE PART
-    //TODO CREATE Actor#applyDamge and make this there.
     const item = game.system.api.ActorcItem_GetFromName(actor, itemName);
       const citem = await auxMeth.getcItem(item.id, item.ciKey);
       const damageType = citem.system.attributes.damageType.value
         ?.toLowerCase()
         .trim();
-      const resistanceAttribute = targetAttributes[`${damageType}resistance`];
-      if (!damageType || !resistanceAttribute) {
-        ui.notifications.error(
-          `${ETHERIA_CONST.moduleName} | Error executing Actor#rollAttack | damageType ${damageType} property is invalid`
-        );
-        return;
-      }
-
-      let realDamage = Math.floor(
-        rollDamageData.result * (resistanceAttribute.value / 100)
-      );
-
-      //If the damage is physical, subtracts the armor
-      if (["bludgeoning", "piercing", "slashing"].includes(damageType))
-        realDamage -= targetAttributes.armorkeytest.value;
-
-      //Update  target actor
-      await target.update({
-        "system.attributes.hp.value": targetAttributes.hp.value - realDamage,
-      });
+      await target.applyDamage({ value: rollDamageData.result, type: damageType });
 
   }
   await rollDataToMessage(actor, user, rollDamageData);
