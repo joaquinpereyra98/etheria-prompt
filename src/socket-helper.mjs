@@ -4,7 +4,7 @@ import {
   prepareRollData,
   prepareRollDamageData,
 } from "./utils/prepareRollData.mjs";
-import requestDialog from "./utils/requestDialog.mjs";
+import createRequestingDialog from "./utils/requestDialog.mjs";
 import { auxMeth } from "../../../../systems/sandbox/module/auxmeth.js";
 
 export default class etheriaSockerHelper {
@@ -116,7 +116,7 @@ export default class etheriaSockerHelper {
       const targetAttributes = target.system.attributes;
       //Request if attack roll is valid.
       await rollDataToMessage(actor, user, attackRollData);
-      const isValidAttack = await requestDialog(attackRollData, "Attack", {
+      const isValidAttack = await createRequestingDialog(attackRollData, "Attack", {
         targetName: target.name,
         actorName: actor.name,
       });
@@ -137,7 +137,7 @@ export default class etheriaSockerHelper {
           attrID,
           reactionKey
         );
-        const targetDodged = await requestDialog(reactionRollData, "Reaction", {
+        const targetDodged = await createRequestingDialog(reactionRollData, "Reaction", {
           targetName: target.name,
           reactionKey: reactionKey.capitalize(),
         });
