@@ -1,13 +1,22 @@
 import ETHERIA_CONST from "../constants.mjs";
-
+/**
+ * Perform an attack roll using an attribute, and applying the damage done from an item.
+ * @param {string} attrKey - The key of a actor attribute.
+ * @param {string} itemName - The name of a actor's cItem.
+ * @returns 
+ */
 export default async function rollAttack(attrKey, itemName) {
   const { attributes } = this.system;
   if (!typeof attrKey === "string" || !attributes[attrKey]) {
-    ui.notifications.error(`${ETHERIA_CONST.moduleName} | Error executing Actor#rollAttack | "${attrKey}" not is a valid attribute key`);
+    ui.notifications.error(
+      `${ETHERIA_CONST.moduleName} | Error executing Actor#rollAttack | "${attrKey}" not is a valid attribute key`
+    );
     return;
   }
-  if(game.user.targets.size === 0){
-    ui.notifications.error(`${ETHERIA_CONST.moduleName} | Error executing Actor#rollAttack | You must select one or more targets`);
+  if (game.user.targets.size === 0) {
+    ui.notifications.error(
+      `${ETHERIA_CONST.moduleName} | Error executing Actor#rollAttack | You must select one or more targets`
+    );
     return;
   }
   const socketData = {
@@ -15,14 +24,14 @@ export default async function rollAttack(attrKey, itemName) {
     actorUuid: this.uuid,
     attrID: attributes[attrKey].id,
     attrKey,
-    itemName
-  }
-  const etheriaSockerHelper = game.modules.get(ETHERIA_CONST.moduleID).etheriaSockerHelper;
-  // Check is current user it GM, if its directly run the handleRequest, else emit the socket
-  if(game.user.isGM){
-    etheriaSockerHelper.handleRequest(socketData)
-  } else {
-    //Emit Socket
-    etheriaSockerHelper.emit(ETHERIA_CONST.socketTypes.requestGM, socketData);
-  }
+    itemName,
+  };
+  const etheriaSockerHelper = game.modules.get(
+    ETHERIA_CONST.moduleID
+  ).etheriaSockerHelper;
+  // Emit the socket for GMs
+  etheriaSockerHelper.emitForGM(
+    ETHERIA_CONST.socketTypes.requestGM,
+    socketData
+  );
 }

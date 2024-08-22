@@ -10,26 +10,96 @@ import { auxMeth } from "../../../../systems/sandbox/module/auxmeth.js";
 export default class etheriaSockerHelper {
   constructor() {
     this.identifier = `module.${ETHERIA_CONST.moduleID}`;
-    this.registerSocket();
+    this._registerSocket();
   }
+  /**
+   * Registers the socket listener for the module's identifier.
+   * @protected
+   */
+  _registerSocket() {
+    game.socket.on(this.identifier, ({ type, payload, userTargetID }) => {
+      if (userTargetID && game.userId !== userTargetID) return;
 
-  registerSocket() {
-    game.socket.on(this.identifier, ({ type, payload }) => {
       console.log(
         `${ETHERIA_CONST.moduleName} | Receive Socket ${this.identifier}.${type} emit by ${payload.userUuid}`
       );
-      switch (type) {
-        case ETHERIA_CONST.socketTypes.requestGM:
-          this.handleRequest(payload);
-          break;
-        case ETHERIA_CONST.socketTypes.createMsg:
-          console.log(payload);
-          this.createMsg(payload);
-          break;
-        default:
-          throw new Error("Unknown socket type");
-      }
+
+      this._handleEvent(type, payload);
     });
+  }
+
+  /**
+   * Emits a socket event with the specified type and payload.
+   * @param {string} type - The type of socket event.
+   * @param {object} payload - The data to send with the event.
+   * @param {string} [userTargetID] - The optional ID of the target user.
+   */
+  emit(type, payload, userTargetID) {
+    console.log(
+      `${ETHERIA_CONST.moduleName} | Emit Socket ${this.identifier}.${type}`
+    );
+    game.socket.emit(this.identifier, { type, payload, userTargetID });
+  }
+
+  /**
+   * Emits an event for the GM or handles it locally if the current user is the GM.
+   * @param {string} type - The type of socket event.
+   * @param {object} payload - The data to send with the event.
+   */
+  emitForGM(type, payload) {
+    const gmId = game.users.activeGM?.id;
+    console.log(type, payload, gmId)
+    if (game.user.isGM) {
+      this._handleEvent(type, payload);
+    } else if (gmId) {
+      this.emit(type, payload, gmId);
+    }
+  }
+
+  /**
+   * Emits an event for a specific user or handles it locally if the user ID matches.
+   * @param {string} userTargetID - The ID of the target user.
+   * @param {string} type - The type of socket event.
+   * @param {object} payload - The data to send with the event.
+   */
+  emitForUser(userTargetID, type, payload) {
+    if (game.userId === userTargetID) {
+      this._handleEvent(type, payload);
+    } else {
+      this.emit(type, payload, userTargetID);
+    }
+  }
+
+  /**
+   * Handles the different types of socket events based on the type.
+   * @param {string} type - The type of socket event.
+   * @param {object} payload - The data associated with the event.
+   * @protected
+   */
+  _handleEvent(type, payload) {
+    const { requestGM, createMsg } = ETHERIA_CONST.socketTypes;
+    switch (type) {
+      case requestGM:
+        this.handleRequest(payload);
+        break;
+      case createMsg:
+        this.createMsg(payload);
+        break;
+      default:
+        throw new Error("Unknown socket type");
+    }
+  }
+
+  /**
+   * 
+   * TODO move all this function out of the class
+   * 
+   */
+
+
+  async createMsg(data) {
+    const { messageData } = data;
+    await ChatMessage.create(messageData);
   }
   async handleRequest(data) {
     if (!game.user.isGM) return;
@@ -112,19 +182,7 @@ export default class etheriaSockerHelper {
       rollDamageData.result
     );
   }
-  async createMsg(data) {
-    const { user, messageData } = data;
-    console.log(user, messageData);
-    if (game.user.id === user._id) {
-      await ChatMessage.create(messageData);
-    }
-  }
-  emit(type, payload) {
-    console.log(
-      `${ETHERIA_CONST.moduleName} | Emit Socket ${this.identifier}.${type}`
-    );
-    game.socket.emit(this.identifier, { type, payload });
-  }
+
   async #createReactionDialog(target) {
     const reactionDialogContent = await renderTemplate(
       `modules/${ETHERIA_CONST.moduleID}/templates/reaction-dialog-template.hbs`,

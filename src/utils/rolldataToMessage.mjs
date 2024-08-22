@@ -29,11 +29,7 @@ export default async function rollDataToMessage(actor, user, rollData) {
   if (whisper) messageData.whisper = whisper;
 
   const { etheriaSockerHelper } = game.modules.get(ETHERIA_CONST.moduleID)
-  if(user.id === game.user.id){
-    etheriaSockerHelper.createMsg({ messageData, user });
-  } else{
-    etheriaSockerHelper.emit(ETHERIA_CONST.socketTypes.createMsg, { messageData, user });
-  }
+  etheriaSockerHelper.emitForUser(user.id, ETHERIA_CONST.socketTypes.createMsg, { messageData });
 
   if(game.dice3d) {
     await game.dice3d.showForRoll(rollData.roll, user, true, messageData.whisper, rollData.blindmode)
