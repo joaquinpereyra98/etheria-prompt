@@ -1,11 +1,5 @@
 import ETHERIA_CONST from "./constants.mjs";
-import rollDataToMessage from "./utils/rolldataToMessage.mjs";
-import {
-  prepareRollData,
-  prepareRollDamageData,
-} from "./utils/prepareRollData.mjs";
-import createRequestingDialog from "./utils/requestDialog.mjs";
-import { auxMeth } from "../../../../systems/sandbox/module/auxmeth.js";
+import onRollAttack from "./utils/onRollAttack.mjs";
 
 export default class etheriaSockerHelper {
   constructor() {
@@ -91,120 +85,31 @@ export default class etheriaSockerHelper {
   }
 
   /**
-   * 
-   * TODO move all this function out of the class
-   * 
+   * Creates a message from the user's client
+   * @param {object} data
+   * @param {import("../v11/common/documents/chat-message.mjs").ChatMessageData} data.messageData
    */
-
-
   async createMsg(data) {
     const { messageData } = data;
     await ChatMessage.create(messageData);
   }
+
+  /**
+   * 
+   * @param {object} data 
+   * @param {string} data.actorUuid - UUID of the actor who executed the attack 
+   * @param {string} data.attrID - the ID of the attribute with which the attack is performed
+   * @param {string} data.attrKey - the KEY  of the attribute with which the attack is performed
+   * @param {string} data.userUuid - UUID of the user who executed the attack
+   * @param {string} data.itemName - the name of the cItem with which the damage will be roll
+   * @returns 
+   */
   async handleRequest(data) {
     if (!game.user.isGM) return;
     const { actorUuid, attrID, attrKey, userUuid, itemName } = data;
     const actor = await fromUuid(actorUuid);
     const user = await fromUuid(userUuid);
-    const attackRollData = await prepareRollData.call(actor, attrID, attrKey);
-    const targetsActor = game.users.get(user._id).targets.map((t) => t.actor);
-    const { useData, rollDamageData } = await prepareRollDamageData(
-      actor,
-      itemName
-    );
-    for (const target of targetsActor) {
-      const targetAttributes = target.system.attributes;
-      //Request if attack roll is valid.
-      await rollDataToMessage(actor, user, attackRollData);
-      const isValidAttack = await createRequestingDialog(attackRollData, "Attack", {
-        targetName: target.name,
-        actorName: actor.name,
-      });
-
-      if (!isValidAttack) return;
-
-      const reactionKey = await this.#createReactionDialog(target);
-
-      //if GM close the reacton dialog, dont roll damage.
-      if (!reactionKey) return;
-
-      //If reaction selected was Block, Dodge or Parry calc the reactionRoll and ask if hit or not.
-      if (["block", "parry", "dodge"].includes(reactionKey)) {
-        //TODO delete agi
-        const attrID = targetAttributes[reactionKey].id;
-        const reactionRollData = await prepareRollData.call(
-          target,
-          attrID,
-          reactionKey
-        );
-        const targetDodged = await createRequestingDialog(reactionRollData, "Reaction", {
-          targetName: target.name,
-          reactionKey: reactionKey.capitalize(),
-        });
-        //If GM select dont apply damage, dont rollDamage.
-        if (!targetDodged) return;
-        await rollDataToMessage(target, game.user, reactionRollData);
-      }
-
-      const item = game.system.api.ActorcItem_GetFromName(actor, itemName);
-      const citem = await auxMeth.getcItem(item.id, item.ciKey);
-      const damageType = citem.system.attributes.damageType.value
-        ?.toLowerCase()
-        .trim();
-      const resistanceAttribute = targetAttributes[`${damageType}resistance`];
-      if (!damageType || !resistanceAttribute) {
-        ui.notifications.error(
-          `${ETHERIA_CONST.moduleName} | Error executing Actor#rollAttack | damageType ${damageType} property is invalid`
-        );
-        return;
-      }
-
-      let realDamage = Math.floor(
-        rollDamageData.result * (resistanceAttribute.value / 100)
-      );
-
-      //If the damage is physical, subtracts the armor
-      if (["bludgeoning", "piercing", "slashing"].includes(damageType))
-        realDamage -= targetAttributes.armorkeytest.value;
-
-      //Update  target actor
-      await target.update({
-        "system.attributes.hp.value": targetAttributes.hp.value - realDamage,
-      });
-    }
-    //Create Damage Message
-    await rollDataToMessage(actor, user, rollDamageData);
-    //Active Item
-    await actor.sheet.activateCI(
-      useData.id,
-      useData.value,
-      useData.iscon,
-      rollDamageData.result
-    );
+    await onRollAttack(actor, { attrID, attrKey }, user, itemName);
   }
 
-  async #createReactionDialog(target) {
-    const reactionDialogContent = await renderTemplate(
-      `modules/${ETHERIA_CONST.moduleID}/templates/reaction-dialog-template.hbs`,
-      { target, reactionOption: ETHERIA_CONST.reactionOption }
-    );
-
-    return await Dialog.prompt({
-      title: `Choose the reaction of ${target.name}`,
-      content: reactionDialogContent,
-      label: "Roll",
-      callback: (html) => {
-        return html.find("input[name=reactionOption]:checked").val();
-      },
-      rejectClose: false,
-      render: (html) => {
-        html.find(".etheria-checkbox").click((ev) => {
-          $(ev.currentTarget).find('input[type="radio"]').prop("checked", true);
-        });
-      },
-      options: {
-        height: 267,
-      },
-    });
-  }
 }

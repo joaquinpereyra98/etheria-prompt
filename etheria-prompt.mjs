@@ -4,7 +4,7 @@ import etheriaSockerHelper from "./src/socket-helper.mjs";
 
 Hooks.on("init", () => {
   console.log(`${ETHERIA_CONST.moduleName} | Initializing ${ETHERIA_CONST.moduleID}}`);
-  //Add to gActor#rollAttack
+  //Wrap Actor#rollAttack
   CONFIG.Actor.documentClass.prototype.rollAttack = rollAttack;
 });
 

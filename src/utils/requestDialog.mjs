@@ -1,5 +1,11 @@
-import ETHERIA_CONST from '../constants.mjs';
-
+import ETHERIA_CONST from "../constants.mjs";
+/**
+ * Return the dialog response
+ * @param {object} rollData 
+ * @param {string} requestType 
+ * @param {object} options 
+ * @returns {Promise<(string)>} 
+ */
 export default async function createRequestingDialog(rollData, requestType, options = {}) {
   const dialogOptions = {
     Attack: {
@@ -21,7 +27,7 @@ export default async function createRequestingDialog(rollData, requestType, opti
     { rollData, labelDialog: dialogOptions.label }
   );
 
-  return await Dialog.wait({
+  return Dialog.wait({
     title: dialogOptions.title,
     content: template,
     buttons: {

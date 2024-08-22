@@ -4,7 +4,7 @@
       "target": "ES6"
     },
     "exclude": ["node_modules", "**/node_modules/*"],
-    "include": ["etheria-prompt.mjs", "v11/**/**.js"],
+    "include": ["etheria-prompt.mjs", "v11/**/**.js", "sandbox/**/**.js"],
     "typeAcquisition": {
       "include": ["jquery"]
     }
