@@ -42,7 +42,6 @@ export default class etheriaSockerHelper {
    */
   emitForGM(type, payload) {
     const gmId = game.users.activeGM?.id;
-    console.log(type, payload, gmId)
     if (game.user.isGM) {
       this._handleEvent(type, payload);
     } else if (gmId) {
