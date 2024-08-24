@@ -7,7 +7,16 @@
         <div class="formula-container">
             <label>Formula: {{rollData.formula}}</label>
             <label>Modifier: {{rollData.mod}}</label>
-            <label>Dice Result: {{rollData.dice.0.total}}</label>
+            <label>Dice Results:</label>
+                {{#each rollData.dice as |die|}}
+                <label> 
+                    <i class="fa-solid fa-dice-d{{faces}}"></i>
+                    {{die.formula}}: 
+                    {{#each die.results as |resultObj|}}
+                        {{resultObj.result}}
+                    {{/each}}
+                </label>
+                {{/each}}
         </div>
     </div>
 </div>

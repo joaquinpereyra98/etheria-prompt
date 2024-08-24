@@ -1,0 +1,17 @@
+<div class="etheria-prompt dialog-content">
+    <span>Choose the modifier for the <b>Damage Roll</b> made by: <b>{{actor}}</b></span>
+    <div class="roll-modifer-container">
+        <fieldset>
+            <legend>Select Modifiers</legend>
+            Numberal Modifiers: <input name='numMod' type='text' value="" placeholder="+4" >
+            Percentage Modifiers: <input name='pctMod' type='text' value="" placeholder="+10%">
+        </fieldset>
+        <fieldset>
+            <legend> Select Data Type</legend>
+            Damage Type:
+            <select name="damageType">
+                 {{selectOptions damageOption selected=damageType}}
+            </select>
+        </fieldset>
+    </div>
+</div>

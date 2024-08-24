@@ -4,7 +4,10 @@ import { prepareRollData, prepareRollDamageData } from "./prepareRollData.mjs";
 import createRequestingDialog from "./requestDialog.mjs";
 import { auxMeth } from "../../../../systems/sandbox/module/auxmeth.js";
 import createReactionDialog from "./createReactionDialog.mjs";
-import { requestRollModifier } from "./requestModifiers.mjs";
+import {
+  requestRollModifier,
+  requestDamageModifier,
+} from "./requestModifiers.mjs";
 /**
  *
  * @param {Actor} actor -
@@ -23,22 +26,29 @@ export default async function onRollAttack(
     attackAttribute.attrID,
     attackAttribute.attrKey
   );
-  attackRollData.flavor = "Accuracy Roll"
+  attackRollData.flavor = "Accuracy Roll";
   const targetsActor = game.users.get(user._id).targets.map((t) => t.actor);
+
   const { useData, rollDamageData } = await prepareRollDamageData(
     actor,
     itemName
   );
+  let damageData = null;
   for (const target of targetsActor) {
     const targetAttributes = target.system.attributes;
     const newAttackRollData = await requestRollModifier(attackRollData);
     //Request if the attack roll is valid.
+    console.log(newAttackRollData, attackRollData)
     await rollDataToMessage(actor, user, newAttackRollData ?? attackRollData);
-    const isValidAttack = await createRequestingDialog(attackRollData, "Attack", {
-      targetName: target.name,
-      actorName: actor.name,
-    });
-    if (!isValidAttack) continue;
+    const isValidAttack = await createRequestingDialog(
+      attackRollData,
+      "Attack",
+      {
+        targetName: target.name,
+        actorName: actor.name,
+      }
+    );
+    if (!isValidAttack) return;
 
     const reactionKey = await createReactionDialog(target);
     //if GM close the reacton dialog, dont roll damage.
@@ -57,8 +67,9 @@ export default async function onRollAttack(
         attrID,
         reactionKey
       );
-      reactionRollData.flavor = `${reactionKey.capitalize()} Roll`
-      const newReactionRollData = await requestRollModifier(reactionRollData)
+      reactionRollData.flavor = `${reactionKey.capitalize()} Roll`;
+      const newReactionRollData = await requestRollModifier(reactionRollData);
+      console.log(reactionRollData, newReactionRollData)
       const targetDodged = await createRequestingDialog(
         newReactionRollData ?? reactionRollData,
         "Reaction",
@@ -74,14 +85,19 @@ export default async function onRollAttack(
 
     //ROLL DAMAGE PART
     const item = game.system.api.ActorcItem_GetFromName(actor, itemName);
-      const citem = await auxMeth.getcItem(item.id, item.ciKey);
-      const damageType = citem.system.attributes.damageType.value
-        ?.toLowerCase()
-        .trim();
-      await target.applyDamage({ value: rollDamageData.result, type: damageType });
-
+    const citem = await auxMeth.getcItem(item.id, item.ciKey);
+    const damageType = citem.system.attributes.damageType.value
+      ?.toLowerCase()
+      .trim();
+    if (!damageData) {
+      damageData = await requestDamageModifier(rollDamageData, damageType, target.system.attributes);
+    }
+    await target.applyDamage({
+      value: damageData.result ??rollDamageData.result,
+      type: damageType,
+    });
   }
-  await rollDataToMessage(actor, user, rollDamageData);
+  await rollDataToMessage(actor, user, damageData ?? rollDamageData);
   //Active Item
   await actor.sheet.activateCI(
     useData.id,
