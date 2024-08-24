@@ -18,7 +18,7 @@ export default async function applyDamage(damage) {
 
   if (!damage.type || !resistanceAttribute) {
     ui.notifications.error(
-      `${ETHERIA_CONST.moduleName} | Error executing Actor#rollAttack | damageType ${damageType} property is invalid`
+      `${ETHERIA_CONST.moduleName} | Error executing Actor#applyDamage | damageType ${damageType} property is invalid`
     );
     return;
   }
