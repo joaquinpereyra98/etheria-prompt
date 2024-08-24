@@ -42,6 +42,9 @@ export async function requestRollModifier(rollData) {
   newRollData.roll = await Roll.create(newRollData.formula).evaluate();
   newRollData.dice = newRollData.roll.dice;
   newRollData.result = newRollData.roll.total;
+
+  newRollData.iscrit = newRollData.dice[0].total === 20;
+
   return foundry.utils.mergeObject(rollData, newRollData);
 }
 /**
@@ -108,22 +111,18 @@ export async function requestDamageModifier(
 
         // Evaluate the expression
         const pctModValue = eval(`1${fragMod}`);
-
         // Update the formula
         data.formula = `round((${data.formula}) * ${pctModValue})`;
-        data.mod += fragMod;
+        data.mod += pctMod;
       }
+      data.conditional = `${damageType} damage`.titleCase();
       data.damageType = damageType;
       return data;
     },
   });
-  if (
-    !Roll.validate(newRollData.formula) ||
-    roll.formula === newRollData.formula
-  ) {
-    return null;
-  }
-  newRollData.roll = await Roll.create(newRollData.formula).evaluate();
+  if (!Roll.validate(newRollData.formula)) return null;
+
+  newRollData.roll = await Roll.create(newRollData.formula).evaluate({maximize: rollData.isD20Critic});
   newRollData.dice = newRollData.roll.dice;
   newRollData.result = newRollData.roll.total;
   return foundry.utils.mergeObject(rollData, newRollData);

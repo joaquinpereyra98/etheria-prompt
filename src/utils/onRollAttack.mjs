@@ -37,8 +37,11 @@ export default async function onRollAttack(
   for (const target of targetsActor) {
     const targetAttributes = target.system.attributes;
     const newAttackRollData = await requestRollModifier(attackRollData);
+
+    //set is attack critic for maximize the damage later.
+    rollDamageData.isD20Critic = attackRollData.iscrit || newAttackRollData?.iscrit;
+
     //Request if the attack roll is valid.
-    console.log(newAttackRollData, attackRollData)
     await rollDataToMessage(actor, user, newAttackRollData ?? attackRollData);
     const isValidAttack = await createRequestingDialog(
       attackRollData,
@@ -69,7 +72,6 @@ export default async function onRollAttack(
       );
       reactionRollData.flavor = `${reactionKey.capitalize()} Roll`;
       const newReactionRollData = await requestRollModifier(reactionRollData);
-      console.log(reactionRollData, newReactionRollData)
       const targetDodged = await createRequestingDialog(
         newReactionRollData ?? reactionRollData,
         "Reaction",
@@ -93,8 +95,8 @@ export default async function onRollAttack(
       damageData = await requestDamageModifier(rollDamageData, damageType, target.system.attributes);
     }
     await target.applyDamage({
-      value: damageData.result ??rollDamageData.result,
-      type: damageType,
+      value: damageData?.result ?? rollDamageData.result,
+      type: damageData?.damageType ?? damageType,
     });
   }
   await rollDataToMessage(actor, user, damageData ?? rollDamageData);
