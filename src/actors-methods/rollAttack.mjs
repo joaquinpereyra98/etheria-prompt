@@ -31,7 +31,7 @@ export default async function rollAttack(attrKey, itemName) {
   ).etheriaSockerHelper;
   // Emit the socket for GMs
   etheriaSockerHelper.emitForGM(
-    ETHERIA_CONST.socketTypes.requestGM,
+    ETHERIA_CONST.socketTypes.requestAttackGM,
     socketData
   );
 }

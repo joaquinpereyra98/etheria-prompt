@@ -10,7 +10,7 @@ export default async function createRequestingDialog(rollData, requestType, opti
   const dialogOptions = {
     Attack: {
       title: `Attack roll made against ${options.targetName}`,
-      label: `<b>${options.actorName}</b> makes an attack roll against <b>${options.targetName}</b>`,
+      label: `<b>${options.actorName}</b> makes an Accuracy Roll against <b>${options.targetName}</b>`,
       confirm: 'Hit',
       reject: 'Miss'
     },
@@ -19,6 +19,12 @@ export default async function createRequestingDialog(rollData, requestType, opti
       label: `<b>${options.targetName}</b> makes a <b>${options.reactionKey}</b> roll`,
       confirm: 'Roll Damage',
       reject: 'Not Roll Damage'
+    },
+    UseItem: {
+      title: `Use item roll made by ${options.actorName}`,
+      label: `<b>${options.actorName}</b> makes a Accuracy Roll`,
+      confirm: 'Use Item',
+      reject: 'Not Use Item'
     }
   }[requestType];
 

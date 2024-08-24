@@ -2,8 +2,9 @@ const ETHERIA_CONST = {
   moduleID: "etheria-prompt",
   moduleName: "Etheria Prompt Module",
   socketTypes: {
-    requestGM: "REQUEST_GM",
-    createMsg: "CREATE_MSG"
+    createMsg: "CREATE_MSG",
+    requestAttackGM: "REQUEST_ATTACK_GM",
+    requestItemUseGM: "REQUEST_ITEM_GM",
   },
 };
 ETHERIA_CONST.reactionOption = {

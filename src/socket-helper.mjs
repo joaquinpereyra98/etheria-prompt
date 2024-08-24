@@ -1,5 +1,6 @@
 import ETHERIA_CONST from "./constants.mjs";
 import onRollAttack from "./utils/onRollAttack.mjs";
+import onItemUse from "./utils/onItemUse.mjs"
 
 export default class etheriaSockerHelper {
   constructor() {
@@ -70,13 +71,16 @@ export default class etheriaSockerHelper {
    * @protected
    */
   _handleEvent(type, payload) {
-    const { requestGM, createMsg } = ETHERIA_CONST.socketTypes;
+    const { requestAttackGM, createMsg, requestItemUseGM } = ETHERIA_CONST.socketTypes;
     switch (type) {
-      case requestGM:
-        this.handleRequest(payload);
+      case requestAttackGM:
+        this.handleAttackRequest(payload);
         break;
       case createMsg:
         this.createMsg(payload);
+        break;
+      case requestItemUseGM:
+        this.handelItemUseRequest(payload)
         break;
       default:
         throw new Error("Unknown socket type");
@@ -103,12 +107,29 @@ export default class etheriaSockerHelper {
    * @param {string} data.itemName - the name of the cItem with which the damage will be roll
    * @returns 
    */
-  async handleRequest(data) {
+  async handleAttackRequest(data) {
     if (!game.user.isGM) return;
     const { actorUuid, attrID, attrKey, userUuid, itemName } = data;
     const actor = await fromUuid(actorUuid);
     const user = await fromUuid(userUuid);
     await onRollAttack(actor, { attrID, attrKey }, user, itemName);
+  }
+  /**
+   * 
+   * @param {object} data 
+   * @param {string} data.actorUuid - UUID of the actor who executed the attack 
+   * @param {string} data.attrID - the ID of the attribute with which the attack is performed
+   * @param {string} data.attrKey - the KEY  of the attribute with which the attack is performed
+   * @param {string} data.userUuid - UUID of the user who executed the attack
+   * @param {string} data.itemName - the name of the cItem with which the damage will be roll
+   * @returns 
+   */
+  async handelItemUseRequest(data) {
+    if (!game.user.isGM) return;
+    const { actorUuid, attrID, attrKey, userUuid, itemName } = data;
+    const actor = await fromUuid(actorUuid);
+    const user = await fromUuid(userUuid);
+    await onItemUse(actor, { attrID, attrKey }, user, itemName);
   }
 
 }
