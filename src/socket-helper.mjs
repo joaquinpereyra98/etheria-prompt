@@ -109,10 +109,10 @@ export default class etheriaSockerHelper {
    */
   async handleAttackRequest(data) {
     if (!game.user.isGM) return;
-    const { actorUuid, attrID, attrKey, userUuid, itemName } = data;
+    const { actorUuid, attrID, attrKey, userUuid, itemName, options={} } = data;
     const actor = await fromUuid(actorUuid);
     const user = await fromUuid(userUuid);
-    await onRollAttack(actor, { attrID, attrKey }, user, itemName);
+    await onRollAttack(actor, { attrID, attrKey }, user, itemName, options);
   }
   /**
    * 
@@ -126,10 +126,10 @@ export default class etheriaSockerHelper {
    */
   async handelItemUseRequest(data) {
     if (!game.user.isGM) return;
-    const { actorUuid, attrID, attrKey, userUuid, itemName } = data;
+    const { actorUuid, attrID, attrKey, userUuid, itemName, options = {} } = data;
     const actor = await fromUuid(actorUuid);
     const user = await fromUuid(userUuid);
-    await onItemUse(actor, { attrID, attrKey }, user, itemName);
+    await onItemUse(actor, { attrID, attrKey }, user, itemName, options);
   }
 
 }

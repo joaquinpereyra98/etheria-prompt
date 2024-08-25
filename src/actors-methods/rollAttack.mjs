@@ -3,9 +3,11 @@ import ETHERIA_CONST from "../constants.mjs";
  * Perform an attack roll using an attribute, and applying the damage done from an item.
  * @param {string} attrKey - The key of a actor attribute.
  * @param {string} itemName - The name of a actor's cItem.
+ * @param {object} [options] - Options for the attack or damaga workflow
+ * @param {boolean} [options.ignoreResistence] - Resistence affect on the damage calc?
  * @returns 
  */
-export default async function rollAttack(attrKey, itemName) {
+export default async function rollAttack(attrKey, itemName, options = {}) {
   const { attributes } = this.system;
   if (!typeof attrKey === "string" || !attributes[attrKey]) {
     ui.notifications.error(
@@ -25,6 +27,7 @@ export default async function rollAttack(attrKey, itemName) {
     attrID: attributes[attrKey].id,
     attrKey,
     itemName,
+    options
   };
   const etheriaSockerHelper = game.modules.get(
     ETHERIA_CONST.moduleID

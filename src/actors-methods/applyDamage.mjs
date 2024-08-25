@@ -1,37 +1,72 @@
 /**
- * Description of a source of damage.
+ * Represents a source of damage or healing.
  *
  * @typedef {object} DamageDescription
- * @property {number} value - Amount of damage.
- * @property {string} type - Type of damage.
- * @property {boolean} [isHealing] - Is Healing?
- * @property {boolean} [isResistanceActive] - Did resistance affect this description?
+ * @property {number} value - The amount of damage or healing.
+ * @property {string} type - The type of damage or healing.
+ * @property {boolean} [isHealing=false] - Indicates if this is healing (true) or damage (false).
+ * @property {boolean} [ignoreResistence=false] - If true, resistance does not affect this damage.
  */
+
 /**
- *  Apply a certain amount of damage or healing to the health pool for Actor
- * @param {DamageDescription} damage
+ * Applies damage or healing to the Actor's health pool.
+ *
+ * @param {DamageDescription} damage - The description of the damage or healing.
+ * @returns {Promise<boolean>} - Returns true if the health was updated, false otherwise.
  */
 export default async function applyDamage(damage) {
   const hp = this.system.attributes.hp;
-  const resistanceAttribute =
-    this.system.attributes[`${damage.type}resistance`];
+  const deltaHP = damage.isHealing 
+    ? calculateHeal.call(this, damage) 
+    : calculateDamage.call(this, damage);
 
-  if (!damage.type || !resistanceAttribute) {
-    ui.notifications.error(
-      `${ETHERIA_CONST.moduleName} | Error executing Actor#applyDamage | damageType ${damageType} property is invalid`
-    );
-    return;
-  }
+  if (!deltaHP) return false;
 
-  let deltaHP = Math.floor(damage.value * (resistanceAttribute.value / 100));
-
-  //If the damage is physical, subtracts the armor
-  if (["bludgeoning", "piercing", "slashing"].includes(damage.type))
-    deltaHP -= this.system.attributes.armorkeytest.value;
-
-  //Update target actor
   const updates = {
     "system.attributes.hp.value": Math.max(hp.value - deltaHP, 0),
   };
-  await this.update(updates);
+  return await this.update(updates);
+}
+
+/**
+ * Calculates the damage to apply, considering resistances.
+ *
+ * @param {DamageDescription} damage - The description of the damage.
+ * @returns {number|false} - The final damage to apply, or false if an error occurred.
+ */
+function calculateDamage(damage) {
+  const resistanceAttribute = this.system.attributes[`${damage.type}resistance`];
+
+  if (damage.ignoreResistence || !resistanceAttribute) {
+    return damage.value;
+  }
+
+  if (!damage.type || resistanceAttribute === undefined) {
+    ui.notifications.error(
+      `${ETHERIA_CONST.moduleName} | Error executing Actor#applyDamage | damage type "${damage.type}" is invalid`
+    );
+    return false;
+  }
+
+  let finalDamage = Math.floor(damage.value * (resistanceAttribute.value / 100));
+  
+  if (["bludgeoning", "piercing", "slashing"].includes(damage.type)) {
+    finalDamage -= this.system.attributes.armorkeytest.value;
+  }
+
+  return finalDamage;
+}
+
+/**
+ * Calculates the healing to apply, considering conditions.
+ *
+ * @param {DamageDescription} damage - The description of the healing.
+ * @returns {number|false} - The final healing amount, or false if an error occurred.
+ */
+function calculateHeal(damage) {
+  if (this.effects.getName('Decayed')) return false;
+
+  const undead = game.system.api.ActorcItem_GetFromName(this, 'Undead');
+  
+  return (damage.type === 'holy' && undead) ? damage.value : -damage.value;
 }

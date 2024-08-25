@@ -1,4 +1,6 @@
-export default async function useCurativeItem(attrKey, itemName) {
+import ETHERIA_CONST from "../constants.mjs";
+ 
+export default async function useCurativeItem(attrKey, itemName, options = {}) {
     const { attributes } = this.system;
   if (!typeof attrKey === "string" || !attributes[attrKey]) {
     ui.notifications.error(
@@ -12,7 +14,7 @@ export default async function useCurativeItem(attrKey, itemName) {
     attrID: attributes[attrKey].id,
     attrKey,
     itemName,
-    isCurativeItem: true
+    options : { isCurativeItem: true }
   };
   const etheriaSockerHelper = game.modules.get(
     ETHERIA_CONST.moduleID

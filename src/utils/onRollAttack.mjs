@@ -14,12 +14,14 @@ import {
  * @param {Object} attackAttribute
  * @param {User} user
  * @param {String} itemName
+ * @param {Object} options
  */
 export default async function onRollAttack(
   actor,
   attackAttribute,
   user,
-  itemName
+  itemName,
+  options
 ) {
   const attackRollData = await prepareRollData.call(
     actor,
@@ -97,6 +99,7 @@ export default async function onRollAttack(
     await target.applyDamage({
       value: damageData?.result ?? rollDamageData.result,
       type: damageData?.damageType ?? damageType,
+      ignoreResistence: options.ignoreResistence || damageType === 'true',
     });
   }
   await rollDataToMessage(actor, user, damageData ?? rollDamageData);
