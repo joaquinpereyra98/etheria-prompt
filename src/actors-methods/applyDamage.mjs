@@ -12,7 +12,7 @@
  * Applies damage or healing to the Actor's health pool.
  *
  * @param {DamageDescription} damage - The description of the damage or healing.
- * @returns {Promise<boolean>} - Returns true if the health was updated, false otherwise.
+ * @returns {Promise<Actor>} - Returns true if the health was updated, false otherwise.
  */
 export default async function applyDamage(damage) {
   const hp = this.system.attributes.hp;
@@ -20,7 +20,7 @@ export default async function applyDamage(damage) {
     ? calculateHeal.call(this, damage) 
     : calculateDamage.call(this, damage);
 
-  if (!deltaHP) return false;
+  if (!deltaHP) return this;
 
   const updates = {
     "system.attributes.hp.value": Math.max(hp.value - deltaHP, 0),

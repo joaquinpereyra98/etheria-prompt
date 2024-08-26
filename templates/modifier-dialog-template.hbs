@@ -7,5 +7,11 @@
             Additional Modifiers: <input name='mod' type='text' value="" placeholder="+4">
             Multiplier: <input name='multiplier' type='text' placeholder="*2">
         </fieldset>
+        {{#if isAttackRoll}}
+            <fieldset>
+                <legend> Optional Modifiers</legend>
+                Maximize Damage On Critic? <input type="checkbox" name="maximizeDamageOnCritic" {{checked options.maximizeDamageOnCritic}}>
+            </fieldset>
+        {{/if}}
     </div>
 </div>

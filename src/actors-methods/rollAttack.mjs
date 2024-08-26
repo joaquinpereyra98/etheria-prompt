@@ -4,7 +4,9 @@ import ETHERIA_CONST from "../constants.mjs";
  * @param {string} attrKey - The key of a actor attribute.
  * @param {string} itemName - The name of a actor's cItem.
  * @param {object} [options] - Options for the attack or damaga workflow
+ * @param {boolean} [options.isHealing] - Indicates if this is healing (true) or damage (false).
  * @param {boolean} [options.ignoreResistence] - Resistence affect on the damage calc?
+ * @param {boolean} [options.maximizeDamageOnCritic] - Maximize damage roll when it's a critical hit?
  * @returns 
  */
 export default async function rollAttack(attrKey, itemName, options = {}) {

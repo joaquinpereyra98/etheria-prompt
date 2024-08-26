@@ -1,129 +1,128 @@
 import ETHERIA_CONST from "../constants.mjs";
 
-export async function requestRollModifier(rollData) {
-  const { roll } = rollData;
+/**
+ * Prompts the user to modify a roll and returns the updated roll data.
+ *
+ * @param {object} rollData - The data for the roll.
+ * @param {boolean} [isAccuracyRoll] - is a accuracy roll?
+ * @returns {Promise<object>} - The updated roll data or old roll data if no changes were made.
+ */
+export async function requestRollModifier(rollData, isAttackRoll=false) {
+  const { roll, actor, flavor, options } = rollData;
 
-  const modifierDialogContent = await renderTemplate(
+  const content = await renderTemplate(
     `modules/${ETHERIA_CONST.moduleID}/templates/modifier-dialog-template.hbs`,
-    { diceData: roll.terms[0], actor: rollData.actor, label: rollData.flavor }
+    { diceData: roll.terms[0], actor, label: flavor, isAttackRoll, options }
   );
+
   const newRollData = await Dialog.prompt({
-    title: `Choose the modifier for the ${rollData.flavor} made by: ${rollData.actor}`,
-    content: modifierDialogContent,
+    title: `Choose the modifier for the ${flavor} made by: ${actor}`,
+    content,
     label: "Roll!",
     callback: (html) => {
-      const data = {
-        formula: roll.formula,
-      };
       const numDice = html.find("input[name=number]").val();
-      const mods = html.find("input[name=mod]").val().trim();
-      const multiplier = html.find("input[name=multiplier]").val().trim();
+      let mods = html.find("input[name=mod]").val().trim();
+      let multiplier = html.find("input[name=multiplier]").val().trim();
+      const maximizeDamageOnCritic =  html.find("input[name=maximizeDamageOnCritic]").is(":checked");
 
-      if (numDice > 1)
-        data.formula = data.formula.replace(/\d+d20/, `${numDice}d20kh`);
-      if (mods && mods !== "+0") {
-        data.formula += ` ${
-          mods.startsWith("+") || mods.startsWith("-") ? mods : "+" + mods
-        }`;
-        data.mod = mods;
+      let formula = roll.formula;
+      let mod = rollData.mod === 0 ? "" : rollData.mod;
+
+      if (numDice > 1) {
+        formula = formula.replace(/\d+d20/, `${numDice}d20kh`);
       }
-      if (multiplier && multiplier !== "*1")
-        data.formula = `(${data.formula}) *${multiplier.replace(/^\*/, "")}`;
+      if (mods && mods !== "+0") {
+        mods = ` ${mods.startsWith("+") || mods.startsWith("-") ? mods : "+" + mods}`
+        formula += mods;
+        mod += mods
+      }
+      if (multiplier && multiplier !== "*1") {
+        multiplier = ` *${multiplier.replace(/^\*/, "")}`;
+        formula = `(${formula})${multiplier}`;
+        mod += multiplier
+      } 
 
-      return data;
+      return { formula, maximizeDamageOnCritic, mod};
     },
   });
-  if (
-    !Roll.validate(newRollData.formula) ||
-    roll.formula === newRollData.formula
-  ) {
-    return null;
+
+  if (!Roll.validate(newRollData.formula) || roll.formula === newRollData.formula) {
+    return rollData;
   }
+
   newRollData.roll = await Roll.create(newRollData.formula).evaluate();
   newRollData.dice = newRollData.roll.dice;
   newRollData.result = newRollData.roll.total;
-
   newRollData.iscrit = newRollData.dice[0].total === 20;
 
   return foundry.utils.mergeObject(rollData, newRollData);
 }
+
 /**
+ * Prompts the user to modify damage and returns the updated roll data.
  *
- * @param {object} rollData
- * @param {string} damageType
- * @param {object} targetAttributes
+ * @param {object} rollData - The data for the roll.
+ * @param {string} damageType - The type of damage.
+ * @param {object} targetAttributes - The target's attributes.
+ * @returns {Promise<object>} - The updated roll data or the old roll data if no changes were made.
  */
-export async function requestDamageModifier(
-  rollData,
-  damageType,
-  targetAttributes
-) {
-  const { roll } = rollData;
+export async function requestDamageModifier(rollData, damageType, targetAttributes) {
+  const { roll, actor, options } = rollData;
 
   const damageOption = Object.fromEntries(
     Object.keys(targetAttributes)
-      .filter((k) => k.endsWith("resistance"))
-      .map((k) => {
-        const key = k.replace("resistance", "");
-        const value = `${key} damage`.titleCase();
-        return [key, value];
-      })
+      .filter(key => key.endsWith("resistance"))
+      .map(key => [key.replace("resistance", ""), `${key.replace("resistance", "")} damage`.titleCase()])
+  );
+  damageOption['true'] = 'True Damage';
+
+  const content = await renderTemplate(
+    `modules/${ETHERIA_CONST.moduleID}/templates/damage-dialog-template.hbs`,
+    { actor, damageType, damageOption, options }
   );
 
-  const modifierDialogContent = await renderTemplate(
-    `modules/${ETHERIA_CONST.moduleID}/templates/damage-dialog-template.hbs`,
-    { actor: rollData.actor, damageType, damageOption }
-  );
   const newRollData = await Dialog.prompt({
-    title: `Choose the modifier for the Damage Roll made by: ${rollData.actor}`,
-    content: modifierDialogContent,
+    title: `Choose the modifier for the Damage Roll made by: ${actor}`,
+    content,
     label: "Roll!",
+    /** @param {JQuery} html  */
     callback: (html) => {
-      const data = {
-        formula: roll.formula,
-        mod: ""
-      };
       const numMod = html.find("input[name=numMod]").val().trim();
-      let pctMod = html.find("input[name=pctMod]").val().trim();
-      const damageType = html.find("select[name=damageType]").val();
+      const pctMod = html.find("input[name=pctMod]").val().trim();
+      const selectedDamageType = html.find("select[name=damageType]").val();
+      const ignoreResistence = selectedDamageType === 'true'? true : html.find("input[name=ignoreResistence]").is(":checked");
+      const isHealing = html.find("input[name=isHealing]").is(":checked");
+
+      let formula = roll.formula;
+      let mod = "";
 
       if (numMod && numMod !== "+0") {
-        // Ensure the modifier starts with + or - and then update the formula
-        data.formula += ` ${
-          numMod.startsWith("+") || numMod.startsWith("-")
-            ? numMod
-            : "+" + numMod
-        }`;
-        data.mod += numMod;
+        mod += numMod.startsWith("+") || numMod.startsWith("-") ? numMod : `+${numMod}`;
+        formula += ` ${mod}`;
       }
 
       if (pctMod && pctMod !== "+0%") {
-        // Ensure the modifier starts with + or -
-        pctMod =
-          pctMod.startsWith("+") || pctMod.startsWith("-")
-            ? pctMod
-            : `+${pctMod}`;
-
-        // Convert percentage to fraction
-        const fragMod = pctMod.replace(/(\+|-)?(\d+)%/g, (_, sign, number) => {
-          return `${sign || ""}${parseInt(number) / 100}`;
-        });
-
-        // Evaluate the expression
-        const pctModValue = eval(`1${fragMod}`);
-        // Update the formula
-        data.formula = `round((${data.formula}) * ${pctModValue})`;
-        data.mod += pctMod;
+        const percentageModifier = pctMod.startsWith("+") || pctMod.startsWith("-") ? pctMod : `+${pctMod}`;
+        const pctModValue = eval(`1${percentageModifier.replace(/(\+|-)?(\d+)%/g, (_, sign, number) => `${sign || ""}${parseInt(number) / 100}`)}`);
+        formula = `round((${formula}) * ${pctModValue})`;
+        mod += pctMod;
       }
-      data.conditional = `${damageType} damage`.titleCase();
-      data.damageType = damageType;
-      return data;
+
+      return {
+        formula,
+        mod,
+        options: { ignoreResistence, isHealing },
+        conditional: `${selectedDamageType} damage`.titleCase(),
+        damageType: selectedDamageType
+      };
     },
   });
-  if (!Roll.validate(newRollData.formula)) return null;
 
-  newRollData.roll = await Roll.create(newRollData.formula).evaluate({maximize: rollData.isD20Critic});
+  if (!Roll.validate(newRollData.formula)) return rollData;
+
+  newRollData.roll = await Roll.create(newRollData.formula).evaluate({ maximize: rollData.isCriticalHit });
   newRollData.dice = newRollData.roll.dice;
   newRollData.result = newRollData.roll.total;
+
   return foundry.utils.mergeObject(rollData, newRollData);
 }

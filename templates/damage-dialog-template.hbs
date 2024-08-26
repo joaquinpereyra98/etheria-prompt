@@ -13,5 +13,10 @@
                  {{selectOptions damageOption selected=damageType}}
             </select>
         </fieldset>
+        <fieldset>
+            <legend>Optional Modifiers</legend>
+            Ignore Resistences? <input type="checkbox" name="ignoreResistence" {{checked options.ignoreResistence}}>
+            Is Healing? <input type="checkbox" name="isHealing" {{checked options.isHealing}}>
+        </fieldset>
     </div>
 </div>

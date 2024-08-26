@@ -19,15 +19,16 @@ export default async function onItemUse(
   itemName,
   options = {}
 ) {
-  const attackRollData = await prepareRollData.call(
+  let attackRollData = await prepareRollData.call(
     actor,
     attackAttribute.attrID,
     attackAttribute.attrKey
   );
   attackRollData.flavor = "Accuracy Roll";
-  const newAttackRollData = await requestRollModifier(attackRollData);
+  attackRollData.options = {maximizeDamageOnCritic: options.maximizeDamageOnCritic ?? false};
+  attackRollData = await requestRollModifier(attackRollData, false);
 
-  await rollDataToMessage(actor, user, newAttackRollData ?? attackRollData);
+  await rollDataToMessage(actor, user, attackRollData);
   const isValidAttack = await createRequestingDialog(attackRollData, "UseItem", {
     actorName: actor.name,
   });

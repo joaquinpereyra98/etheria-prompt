@@ -10,41 +10,50 @@ import {
 } from "./requestModifiers.mjs";
 /**
  *
- * @param {Actor} actor -
- * @param {Object} attackAttribute
- * @param {User} user
- * @param {String} itemName
- * @param {Object} options
+ * @param {Actor} actor - Actor who executed the attack
+ * @param {Object} attackAttribute - Attribute with which the attack is performed
+ * @param {User} user - User who executed the attack
+ * @param {String} itemName - the name of the cItem with which the damage will be roll
+ * @param {object} [options] - Options for the attack or damaga workflow
+ * @param {boolean} [options.isHealing] - Indicates if this is healing (true) or damage (false).
+ * @param {boolean} [options.ignoreResistence] - Resistence affect on the damage calc?
+ * @param {boolean} [options.maximizeDamageOnCritic] - Maximize damage roll when it's a critical hit?
  */
 export default async function onRollAttack(
   actor,
   attackAttribute,
   user,
   itemName,
-  options
+  options = {}
 ) {
-  const attackRollData = await prepareRollData.call(
+  let attackRollData = await prepareRollData.call(
     actor,
     attackAttribute.attrID,
     attackAttribute.attrKey
   );
   attackRollData.flavor = "Accuracy Roll";
+  attackRollData.options = {maximizeDamageOnCritic: options.maximizeDamageOnCritic ?? true}
   const targetsActor = game.users.get(user._id).targets.map((t) => t.actor);
 
-  const { useData, rollDamageData } = await prepareRollDamageData(
+  let { useData, rollDamageData } = await prepareRollDamageData(
     actor,
     itemName
   );
-  let damageData = null;
+
+  rollDamageData.options = {
+    isHealing: options.isHealing ?? false,
+    ignoreResistence: options.ignoreResistence ?? false
+  }
+
   for (const target of targetsActor) {
     const targetAttributes = target.system.attributes;
-    const newAttackRollData = await requestRollModifier(attackRollData);
+    attackRollData = await requestRollModifier(attackRollData, true);
 
     //set is attack critic for maximize the damage later.
-    rollDamageData.isD20Critic = attackRollData.iscrit || newAttackRollData?.iscrit;
+    rollDamageData.isCriticalHit = attackRollData.options.maximizeDamageOnCritic ? attackRollData.iscrit : false;
 
     //Request if the attack roll is valid.
-    await rollDataToMessage(actor, user, newAttackRollData ?? attackRollData);
+    await rollDataToMessage(actor, user, attackRollData);
     const isValidAttack = await createRequestingDialog(
       attackRollData,
       "Attack",
@@ -67,15 +76,15 @@ export default async function onRollAttack(
         );
         continue;
       }
-      const reactionRollData = await prepareRollData.call(
+      let reactionRollData = await prepareRollData.call(
         target,
         attrID,
         reactionKey
       );
       reactionRollData.flavor = `${reactionKey.capitalize()} Roll`;
-      const newReactionRollData = await requestRollModifier(reactionRollData);
+      reactionRollData = await requestRollModifier(reactionRollData);
       const targetDodged = await createRequestingDialog(
-        newReactionRollData ?? reactionRollData,
+        reactionRollData,
         "Reaction",
         {
           targetName: target.name,
@@ -93,16 +102,17 @@ export default async function onRollAttack(
     const damageType = citem.system.attributes.damageType.value
       ?.toLowerCase()
       .trim();
-    if (!damageData) {
-      damageData = await requestDamageModifier(rollDamageData, damageType, target.system.attributes);
-    }
+    if(damageType === 'true') rollDamageData.options.ignoreResistence = true;
+    rollDamageData = await requestDamageModifier(rollDamageData, damageType, target.system.attributes);
+
     await target.applyDamage({
-      value: damageData?.result ?? rollDamageData.result,
-      type: damageData?.damageType ?? damageType,
-      ignoreResistence: options.ignoreResistence || damageType === 'true',
+      value: rollDamageData.result,
+      type: rollDamageData.damageType ?? damageType,
+      ignoreResistence:  rollDamageData.options.ignoreResistence,
+      isHealing:  rollDamageData.options.isHealing
     });
   }
-  await rollDataToMessage(actor, user, damageData ?? rollDamageData);
+  await rollDataToMessage(actor, user, rollDamageData);
   //Active Item
   await actor.sheet.activateCI(
     useData.id,
