@@ -8,6 +8,7 @@ import {
   requestRollModifier,
   requestDamageModifier,
 } from "./requestModifiers.mjs";
+import rollAttack from "../actors-methods/rollAttack.mjs";
 /**
  *
  * @param {Actor} actor - Actor who executed the attack
@@ -18,6 +19,7 @@ import {
  * @param {boolean} [options.isHealing] - Indicates if this is healing (true) or damage (false).
  * @param {boolean} [options.ignoreResistence] - Resistence affect on the damage calc?
  * @param {boolean} [options.maximizeDamageOnCritic] - Maximize damage roll when it's a critical hit?
+ * @param {boolean} [options.applyEffectsOnHit] - Applu all item active effect on target actor on hit?
  */
 export default async function onRollAttack(
   actor,
@@ -32,7 +34,10 @@ export default async function onRollAttack(
     attackAttribute.attrKey
   );
   attackRollData.flavor = "Accuracy Roll";
-  attackRollData.options = {maximizeDamageOnCritic: options.maximizeDamageOnCritic ?? true}
+  attackRollData.options = {
+    maximizeDamageOnCritic: options.maximizeDamageOnCritic ?? true,
+    applyEffectsOnHit: options.applyEffectsOnHit ?? true
+  }
   const targetsActor = game.users.get(user._id).targets.map((t) => t.actor);
 
   let { useData, rollDamageData } = await prepareRollDamageData(
@@ -99,6 +104,14 @@ export default async function onRollAttack(
     //ROLL DAMAGE PART
     const item = game.system.api.ActorcItem_GetFromName(actor, itemName);
     const citem = await auxMeth.getcItem(item.id, item.ciKey);
+
+    //Apply active effecto to target if applyEffectsOnHit is true
+    if(attackRollData.options.applyEffectsOnHit){
+        const targetEffectsNames = target.effects.map(ef => ef.name)
+        const itemEffects = citem.effects.filter(ef=> !targetEffectsNames.includes(ef.name)).map(ef => ef.clone());
+        await target.createEmbeddedDocuments("ActiveEffect", itemEffects)
+    }
+
     const damageType = citem.system.attributes.damageType.value
       ?.toLowerCase()
       .trim();

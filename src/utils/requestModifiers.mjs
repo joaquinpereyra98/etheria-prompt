@@ -7,7 +7,7 @@ import ETHERIA_CONST from "../constants.mjs";
  * @param {boolean} [isAccuracyRoll] - is a accuracy roll?
  * @returns {Promise<object>} - The updated roll data or old roll data if no changes were made.
  */
-export async function requestRollModifier(rollData, isAttackRoll=false) {
+export async function requestRollModifier(rollData, isAttackRoll = false) {
   const { roll, actor, flavor, options } = rollData;
 
   const content = await renderTemplate(
@@ -23,7 +23,12 @@ export async function requestRollModifier(rollData, isAttackRoll=false) {
       const numDice = html.find("input[name=number]").val();
       let mods = html.find("input[name=mod]").val().trim();
       let multiplier = html.find("input[name=multiplier]").val().trim();
-      const maximizeDamageOnCritic =  html.find("input[name=maximizeDamageOnCritic]").is(":checked");
+      const maximizeDamageOnCritic = html
+        .find("input[name=maximizeDamageOnCritic]")
+        .is(":checked");
+      const applyEffectsOnHit = html
+        .find("input[name=applyEffectsOnHit]")
+        .is(":checked");
 
       let formula = roll.formula;
       let mod = rollData.mod === 0 ? "" : rollData.mod;
@@ -32,21 +37,26 @@ export async function requestRollModifier(rollData, isAttackRoll=false) {
         formula = formula.replace(/\d+d20/, `${numDice}d20kh`);
       }
       if (mods && mods !== "+0") {
-        mods = ` ${mods.startsWith("+") || mods.startsWith("-") ? mods : "+" + mods}`
+        mods = ` ${
+          mods.startsWith("+") || mods.startsWith("-") ? mods : "+" + mods
+        }`;
         formula += mods;
-        mod += mods
+        mod += mods;
       }
       if (multiplier && multiplier !== "*1") {
         multiplier = ` *${multiplier.replace(/^\*/, "")}`;
         formula = `(${formula})${multiplier}`;
-        mod += multiplier
-      } 
+        mod += multiplier;
+      }
 
-      return { formula, maximizeDamageOnCritic, mod};
+      return { formula, maximizeDamageOnCritic, mod, applyEffectsOnHit };
     },
   });
 
-  if (!Roll.validate(newRollData.formula) || roll.formula === newRollData.formula) {
+  if (
+    !Roll.validate(newRollData.formula) ||
+    roll.formula === newRollData.formula
+  ) {
     return rollData;
   }
 
@@ -66,15 +76,22 @@ export async function requestRollModifier(rollData, isAttackRoll=false) {
  * @param {object} targetAttributes - The target's attributes.
  * @returns {Promise<object>} - The updated roll data or the old roll data if no changes were made.
  */
-export async function requestDamageModifier(rollData, damageType, targetAttributes) {
+export async function requestDamageModifier(
+  rollData,
+  damageType,
+  targetAttributes
+) {
   const { roll, actor, options } = rollData;
 
   const damageOption = Object.fromEntries(
     Object.keys(targetAttributes)
-      .filter(key => key.endsWith("resistance"))
-      .map(key => [key.replace("resistance", ""), `${key.replace("resistance", "")} damage`.titleCase()])
+      .filter((key) => key.endsWith("resistance"))
+      .map((key) => [
+        key.replace("resistance", ""),
+        `${key.replace("resistance", "")} damage`.titleCase(),
+      ])
   );
-  damageOption['true'] = 'True Damage';
+  damageOption["true"] = "True Damage";
 
   const content = await renderTemplate(
     `modules/${ETHERIA_CONST.moduleID}/templates/damage-dialog-template.hbs`,
@@ -90,20 +107,34 @@ export async function requestDamageModifier(rollData, damageType, targetAttribut
       const numMod = html.find("input[name=numMod]").val().trim();
       const pctMod = html.find("input[name=pctMod]").val().trim();
       const selectedDamageType = html.find("select[name=damageType]").val();
-      const ignoreResistence = selectedDamageType === 'true'? true : html.find("input[name=ignoreResistence]").is(":checked");
+      const ignoreResistence =
+        selectedDamageType === "true"
+          ? true
+          : html.find("input[name=ignoreResistence]").is(":checked");
       const isHealing = html.find("input[name=isHealing]").is(":checked");
 
       let formula = roll.formula;
       let mod = "";
 
       if (numMod && numMod !== "+0") {
-        mod += numMod.startsWith("+") || numMod.startsWith("-") ? numMod : `+${numMod}`;
+        mod +=
+          numMod.startsWith("+") || numMod.startsWith("-")
+            ? numMod
+            : `+${numMod}`;
         formula += ` ${mod}`;
       }
 
       if (pctMod && pctMod !== "+0%") {
-        const percentageModifier = pctMod.startsWith("+") || pctMod.startsWith("-") ? pctMod : `+${pctMod}`;
-        const pctModValue = eval(`1${percentageModifier.replace(/(\+|-)?(\d+)%/g, (_, sign, number) => `${sign || ""}${parseInt(number) / 100}`)}`);
+        const percentageModifier =
+          pctMod.startsWith("+") || pctMod.startsWith("-")
+            ? pctMod
+            : `+${pctMod}`;
+        const pctModValue = eval(
+          `1${percentageModifier.replace(
+            /(\+|-)?(\d+)%/g,
+            (_, sign, number) => `${sign || ""}${parseInt(number) / 100}`
+          )}`
+        );
         formula = `round((${formula}) * ${pctModValue})`;
         mod += pctMod;
       }
@@ -113,14 +144,16 @@ export async function requestDamageModifier(rollData, damageType, targetAttribut
         mod,
         options: { ignoreResistence, isHealing },
         conditional: `${selectedDamageType} damage`.titleCase(),
-        damageType: selectedDamageType
+        damageType: selectedDamageType,
       };
     },
   });
 
   if (!Roll.validate(newRollData.formula)) return rollData;
 
-  newRollData.roll = await Roll.create(newRollData.formula).evaluate({ maximize: rollData.isCriticalHit });
+  newRollData.roll = await Roll.create(newRollData.formula).evaluate({
+    maximize: rollData.isCriticalHit,
+  });
   newRollData.dice = newRollData.roll.dice;
   newRollData.result = newRollData.roll.total;
 

@@ -7,6 +7,7 @@ import ETHERIA_CONST from "../constants.mjs";
  * @param {boolean} [options.isHealing] - Indicates if this is healing (true) or damage (false).
  * @param {boolean} [options.ignoreResistence] - Resistence affect on the damage calc?
  * @param {boolean} [options.maximizeDamageOnCritic] - Maximize damage roll when it's a critical hit?
+ * @param {boolean} [options.applyEffectsOnHit] - Applu all item active effect on target actor on hit?
  * @returns 
  */
 export default async function rollAttack(attrKey, itemName, options = {}) {

@@ -89,15 +89,6 @@ export async function renderItemAETab(app, $html, data) {
     const element = ev.currentTarget;
     const dataset = element.dataset;
     switch (dataset.action) {
-      case "toggle-effect":
-        {
-          const li = element.closest(".active-effect-item");
-          const effectID = li.dataset.effectId;
-          const effect = effects.get(effectID);
-          console.log(effect);
-          await effect.update({ disabled: !effect.disabled });
-        }
-        break;
       case "edit-effect":
         {
           const li = element.closest(".active-effect-item");
