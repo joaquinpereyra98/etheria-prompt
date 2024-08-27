@@ -61,6 +61,13 @@ export async function renderActorAETab(app, $html, data) {
         break;
     }
   });
+  $divStatusTab.find(".stack-input").on("change", async (ev) => {
+    const element = ev.currentTarget;
+    const li = element.closest(".active-effect-item");
+    const effectID = li.dataset.effectId;
+    const effect = effects.get(effectID);
+    effect.setFlag(ETHERIA_CONST.moduleID, "stack", $(element).val())
+  })
 }
 /** Handler for add active effect tab  on cItems
  * @param {Application} app - The Application instance being rendered
@@ -74,7 +81,6 @@ export async function renderItemAETab(app, $html, data) {
   const effects = item.effects;
   const $tabs = $html.find("nav.sheet-tabs");
   const $sheetBody = $html.find(".sheet-body");
-    console.log($sheetBody)
   $tabs.append(
     '<a class="item item-tab-button" data-tab="effects">Effects</a>'
   );
@@ -83,7 +89,7 @@ export async function renderItemAETab(app, $html, data) {
     `modules/${ETHERIA_CONST.moduleID}/templates/item-active-effect-tab.hbs`,
     { effects }
   );
-      $sheetBody.append(activeEffectSection)
+  $sheetBody.append(activeEffectSection);
 
   $sheetBody.find(".effect-button").on("click", async (ev) => {
     const element = ev.currentTarget;

@@ -133,6 +133,13 @@
     flex: 1;
     text-align: center;
 }
+.etheria-prompt.active-effect-section .effect-list .stack-div {
+    flex: 1;
+    text-align: center;
+}
+.etheria-prompt.active-effect-section .effect-list .stack-div input {
+    width: 40%;
+}
 .etheria-prompt.active-effect-section .effect-list .button-panel {
     display: flex;
     flex: 1;

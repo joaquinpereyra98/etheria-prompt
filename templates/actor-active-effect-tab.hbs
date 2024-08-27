@@ -6,6 +6,9 @@
         <div class="duration-header">
             Duration
         </div>
+        <div class="duration-header">
+            Stack
+        </div>
         <div class="action-headers">
             <a class="effect-button create-effect" data-action="create-effect">
                 <i class="fa-solid fa-plus"></i>
@@ -28,7 +31,10 @@
                 <i class="fas fa-clock"></i>
                 <span class="duration-span">{{ effect.duration.label }}</span>
             </div>
-            <div class="button-panel" data-effect-id="{{effect._id}}">
+            <div class="stack-div">
+                <input type="number" class="stack-input" value="{{lookup (lookup effect.flags 'etheria-prompt') 'stack'}}">
+            </div>
+            <div class="button-panel">
                 <a class="effect-button toggle-effect" data-action="toggle-effect">
                     <i class="fa-solid fa-toggle-{{ifThen effect.disabled 'off' 'on'}}"></i>
                 </a>
