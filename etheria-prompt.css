@@ -67,3 +67,90 @@
     width: 15px;
     cursor: pointer;
 }
+.etheria-prompt.active-effect-section {
+    padding: 0 0.6em;
+}
+.etheria-prompt.active-effect-section .effect-header {
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    font-size: large;
+    color: white;
+    padding: 2px 5px;
+}
+
+.etheria-prompt.active-effect-section .effect-header .name-header {
+    flex: 2;
+}
+.etheria-prompt.active-effect-section .effect-header .duration-header {
+    text-align: center;
+    flex: 1;
+}
+.etheria-prompt.active-effect-section .effect-header .action-headers {
+    text-align: end;
+    flex: 1;
+}
+.etheria-prompt.active-effect-section .effect-header .action-headers a {
+    color: rgba(255, 255, 255, 0.7);
+    transition-duration: 0.08s;
+    font-size: 15px;
+}
+.etheria-prompt.active-effect-section .effect-header .action-headers a:hover {
+    color: white;
+    font-size: 16px;
+}
+.etheria-prompt.active-effect-section .effect-list {
+    padding: 0;
+    margin: 0;
+}
+.etheria-prompt.active-effect-section .effect-list li{
+    list-style: none;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px white solid;
+    background-color: rgba(0,0,0,0.12);
+    padding: 0.2em 0 ;
+}
+
+.etheria-prompt.active-effect-section .effect-list .effect-image {
+    height: var(--sb-table-citem-icon-size);
+    width: var(--sb-table-citem-icon-size);
+    border: 0;
+    margin-right: 5px;
+}
+
+.etheria-prompt.active-effect-section .effect-list .name-effect-div {
+    display: flex;
+    align-items: flex-end;
+}
+
+.etheria-prompt.active-effect-section .effect-list .effect-name {
+    flex: 2;
+    display: flex;
+    align-items: center;
+    font-size: large;
+}
+.etheria-prompt.active-effect-section .effect-list .duration-div {
+    flex: 1;
+    text-align: center;
+}
+.etheria-prompt.active-effect-section .effect-list .button-panel {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.etheria-prompt.active-effect-section .effect-list .button-panel i {
+    font-size: 16px;
+    padding: 0 2px;
+}
+
+.etheria-prompt.active-effect-section .effect-list .button-panel a {
+    margin: 0 3px;
+    color: rgba(0,0,0,0.6);
+    transition-duration: 0.08s;
+}
+.etheria-prompt.active-effect-section .effect-list .button-panel a:hover {
+    text-shadow: 0;
+    color: black;
+    transform: scale(1.1);    
+}

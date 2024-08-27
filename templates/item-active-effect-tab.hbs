@@ -1,0 +1,47 @@
+<div class="tab attributes" data-group="primary" data-tab="effects">
+    <div class="etheria-prompt active-effect-section">
+        <div class="effect-header">
+            <div class="name-header">
+                Active Effect
+            </div>
+            <div class="duration-header">
+                Duration
+            </div>
+            <div class="action-headers">
+                <a class="effect-button create-effect" data-action="create-effect">
+                    <i class="fa-solid fa-plus"></i>
+                    Create Effect
+                </a>
+            </div>
+        </div>
+        <ol class="effect-list">
+            {{#each effects as |effect effectId|}}
+            <li class="active-effect-item" data-effect-id="{{effect._id}}">
+                <div class="effect-name">
+                    <div class="name-effect-div">
+                        <img class="effect-image" src="{{effect.icon}}" alt="{{effect.name}}">
+                        <span class="effect-name-span">
+                            {{effect.name}}
+                        </span>
+                    </div>
+                </div>
+                <div class="duration-div">
+                    <i class="fas fa-clock"></i>
+                    <span class="duration-span">{{ effect.duration.label }}</span>
+                </div>
+                <div class="button-panel" data-effect-id="{{effect._id}}">
+                    <a class="effect-button toggle-effect" data-action="toggle-effect">
+                        <i class="fa-solid fa-toggle-{{ifThen effect.disabled 'on' 'off'}}"></i>
+                    </a>
+                    <a class="effect-button edit-effect" data-action="edit-effect">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                    <a class="effect-button delete-effect" data-action="delete-effect">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
+                </div>
+            </li>
+            {{/each}}
+        </ol>
+    </div>
+</div>

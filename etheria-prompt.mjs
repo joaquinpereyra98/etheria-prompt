@@ -4,6 +4,7 @@ import etheriaSockerHelper from "./src/socket-helper.mjs";
 import applyDamage from "./src/actors-methods/applyDamage.mjs";
 import useItem from "./src/actors-methods/useItem.mjs";
 import useCurativeItem from "./src/actors-methods/useCurativeItem.mjs";
+import { renderActorAETab, renderItemAETab } from "./src/active-effect-tab/renderActiveEffectTab.mjs";
 
 Hooks.on("init", () => {
   console.log(`${ETHERIA_CONST.moduleName} | Initializing ${ETHERIA_CONST.moduleID}}`);
@@ -18,3 +19,6 @@ Hooks.on("ready", () => {
   game.modules.get(ETHERIA_CONST.moduleID).etheriaSockerHelper =
     new etheriaSockerHelper();
 });
+
+Hooks.on('rendergActorSheet', renderActorAETab);
+Hooks.on('rendersItemSheet', renderItemAETab)
