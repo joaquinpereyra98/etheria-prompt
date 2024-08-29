@@ -8,6 +8,12 @@
                 Duration
             </div>
             <div class="action-headers">
+                {{#if isDFredEffect}}
+                <a class="effect-button import-effect" data-action="import-effect">
+                    <i class="fa-solid fa-file-import"></i>
+                    DFreds Effects
+                </a>
+                {{/if}}
                 <a class="effect-button create-effect" data-action="create-effect">
                     <i class="fa-solid fa-plus"></i>
                     Create Effect

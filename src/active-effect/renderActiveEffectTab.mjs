@@ -1,4 +1,5 @@
 import ETHERIA_CONST from "../constants.mjs";
+import importDFredEffectDialog from "./import-DFred-effects-dialog.mjs";
 
 /** Handler for add active effect table on Status Effect Tab on Actors
  * @param {Application} app - The Application instance being rendered
@@ -8,10 +9,19 @@ import ETHERIA_CONST from "../constants.mjs";
 export async function renderActorAETab(app, $html, data) {
   const actor = app.actor;
   const effects = actor.effects;
-
+  const isDFredEffect = !!game.modules.get("dfreds-convenient-effects");
+  const dataRender = {
+    effects: effects.map((ef) => ({
+      ...ef,
+      id: ef._id,
+      durationLabel: ef.duration.label,
+      stack: ef.getFlag(`${ETHERIA_CONST.moduleID}`, "stack") ?? 0,
+    })),
+    isDFredEffect,
+  };
   const activeEffectSection = await renderTemplate(
     `modules/${ETHERIA_CONST.moduleID}/templates/actor-active-effect-tab.hbs`,
-    { effects }
+    dataRender
   );
 
   const $divStatusTab = $html.find(".buffdebufftab_tab");
@@ -55,19 +65,29 @@ export async function renderActorAETab(app, $html, data) {
               origin: actor.uuid,
               "duration.rounds": undefined,
               disabled: false,
+              statuses: [`${ETHERIA_CONST.moduleName}`],
             },
           ]);
         }
         break;
+      case "import-effect":
+        {
+          if (!isDFredEffect) break;
+          await importDFredEffectDialog(actor);
+        }
+        break;
     }
   });
-  $divStatusTab.find(".stack-input").on("change", async (ev) => {
-    const element = ev.currentTarget;
-    const li = element.closest(".active-effect-item");
-    const effectID = li.dataset.effectId;
-    const effect = effects.get(effectID);
-    effect.setFlag(ETHERIA_CONST.moduleID, "stack", $(element).val())
-  })
+  $divStatusTab
+    .find(".stack-input")
+    .on("change", async (ev) => {
+      const element = ev.currentTarget;
+      const li = element.closest(".active-effect-item");
+      const effectID = li.dataset.effectId;
+      const effect = effects.get(effectID);
+      await effect.setFlag(ETHERIA_CONST.moduleID, "stack", element.value);
+    })[0]
+    ?.focus();
 }
 /** Handler for add active effect tab  on cItems
  * @param {Application} app - The Application instance being rendered
@@ -84,10 +104,10 @@ export async function renderItemAETab(app, $html, data) {
   $tabs.append(
     '<a class="item item-tab-button" data-tab="effects">Effects</a>'
   );
-
+  const isDFredEffect = !!game.modules.get("dfreds-convenient-effects");
   const activeEffectSection = await renderTemplate(
     `modules/${ETHERIA_CONST.moduleID}/templates/item-active-effect-tab.hbs`,
-    { effects }
+    { effects,  isDFredEffect}
   );
   $sheetBody.append(activeEffectSection);
 
@@ -120,8 +140,15 @@ export async function renderItemAETab(app, $html, data) {
               origin: item.uuid,
               "duration.rounds": undefined,
               disabled: false,
+              statuses: [`${ETHERIA_CONST.moduleName}`],
             },
           ]);
+        }
+        break;
+      case "import-effect":
+        {
+          if (!isDFredEffect) break;
+          await importDFredEffectDialog(item);
         }
         break;
     }

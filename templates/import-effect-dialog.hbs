@@ -1,0 +1,13 @@
+<form class="etheria-prompt import-effect-dialog">
+    {{#each effects as |effect|}}
+        <div class="effect-section">
+            <img src="{{effect.icon}}" alt="{{effect.name}}">
+            <div class="effect-name">
+                {{effect.name}}
+            </div>
+            <div class="check-div">
+                <input type="checkbox" name="{{effect.name}}" {{checked effect.inDocument}} {{disabled effect.inDocument}}>
+            </div>
+        </div>
+    {{/each}}
+</form>

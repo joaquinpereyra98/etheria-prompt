@@ -51,6 +51,7 @@ export async function requestRollModifier(rollData, isAttackRoll = false) {
 
       return { formula, maximizeDamageOnCritic, mod, applyEffectsOnHit };
     },
+    close: () => {}
   });
 
   if (
@@ -147,6 +148,7 @@ export async function requestDamageModifier(
         damageType: selectedDamageType,
       };
     },
+    close: () => {}
   });
 
   if (!Roll.validate(newRollData.formula)) return rollData;

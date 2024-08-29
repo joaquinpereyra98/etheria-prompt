@@ -36,8 +36,8 @@ export default async function onRollAttack(
   attackRollData.flavor = "Accuracy Roll";
   attackRollData.options = {
     maximizeDamageOnCritic: options.maximizeDamageOnCritic ?? true,
-    applyEffectsOnHit: options.applyEffectsOnHit ?? true
-  }
+    applyEffectsOnHit: options.applyEffectsOnHit ?? true,
+  };
   const targetsActor = game.users.get(user._id).targets.map((t) => t.actor);
 
   let { useData, rollDamageData } = await prepareRollDamageData(
@@ -47,15 +47,17 @@ export default async function onRollAttack(
 
   rollDamageData.options = {
     isHealing: options.isHealing ?? false,
-    ignoreResistence: options.ignoreResistence ?? false
-  }
+    ignoreResistence: options.ignoreResistence ?? false,
+  };
 
   for (const target of targetsActor) {
     const targetAttributes = target.system.attributes;
     attackRollData = await requestRollModifier(attackRollData, true);
 
     //set is attack critic for maximize the damage later.
-    rollDamageData.isCriticalHit = attackRollData.options.maximizeDamageOnCritic ? attackRollData.iscrit : false;
+    rollDamageData.isCriticalHit = attackRollData.options.maximizeDamageOnCritic
+      ? attackRollData.iscrit
+      : false;
 
     //Request if the attack roll is valid.
     await rollDataToMessage(actor, user, attackRollData);
@@ -105,25 +107,47 @@ export default async function onRollAttack(
     const item = game.system.api.ActorcItem_GetFromName(actor, itemName);
     const citem = await auxMeth.getcItem(item.id, item.ciKey);
 
-    //Apply active effecto to target if applyEffectsOnHit is true
-    if(attackRollData.options.applyEffectsOnHit){
-        const targetEffectsNames = target.effects.map(ef => ef.name)
-        const itemEffects = citem.effects.filter(ef=> !targetEffectsNames.includes(ef.name)).map(ef => ef.clone());
-        await target.createEmbeddedDocuments("ActiveEffect", itemEffects)
-    }
-
     const damageType = citem.system.attributes.damageType.value
       ?.toLowerCase()
       .trim();
-    if(damageType === 'true') rollDamageData.options.ignoreResistence = true;
-    rollDamageData = await requestDamageModifier(rollDamageData, damageType, target.system.attributes);
+    if (damageType === "true") rollDamageData.options.ignoreResistence = true;
+    rollDamageData = await requestDamageModifier(
+      rollDamageData,
+      damageType,
+      target.system.attributes
+    );
 
     await target.applyDamage({
       value: rollDamageData.result,
       type: rollDamageData.damageType ?? damageType,
-      ignoreResistence:  rollDamageData.options.ignoreResistence,
-      isHealing:  rollDamageData.options.isHealing
+      ignoreResistence: rollDamageData.options.ignoreResistence,
+      isHealing: rollDamageData.options.isHealing,
     });
+
+    //Apply active effecto to target if applyEffectsOnHit is true
+    if (attackRollData.options.applyEffectsOnHit) {
+      const targetEffects = target.effects;
+      const newEffects = [];
+      const effectsUpdates = [];
+      for (let ef of citem.effects) {
+        const effectOnActor = targetEffects.getName(ef.name);
+        if (effectOnActor) {
+          const itemStack = ef.getFlag(ETHERIA_CONST.moduleID, "stack");
+          const effectStack = effectOnActor.getFlag(
+            ETHERIA_CONST.moduleID,
+            "stack"
+          );
+          effectsUpdates.push({
+            _id: effectOnActor._id,
+            [`flags.${ETHERIA_CONST.moduleID}.stack`]: itemStack + effectStack,
+          });
+        } else {
+          newEffects.push(ef.clone());
+        }
+      }
+      await target.createEmbeddedDocuments("ActiveEffect", newEffects);
+      await target.updateEmbeddedDocuments("ActiveEffect", effectsUpdates);
+    }
   }
   await rollDataToMessage(actor, user, rollDamageData);
   //Active Item

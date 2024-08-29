@@ -10,6 +10,12 @@
             Stack
         </div>
         <div class="action-headers">
+            {{#if isDFredEffect}}
+            <a class="effect-button import-effect" data-action="import-effect">
+                <i class="fa-solid fa-file-import"></i>
+                DFreds Effects
+            </a>
+            {{/if}}
             <a class="effect-button create-effect" data-action="create-effect">
                 <i class="fa-solid fa-plus"></i>
                 Create Effect
@@ -17,8 +23,8 @@
         </div>
     </div>
     <ol class="effect-list">
-        {{#each effects as |effect effectId|}}
-        <li class="active-effect-item" data-effect-id="{{effect._id}}">
+        {{#each effects as |effect|}}
+        <li class="active-effect-item" data-effect-id="{{effect.id}}">
             <div class="effect-name">
                 <div class="name-effect-div">
                     <img class="effect-image" src="{{effect.icon}}" alt="{{effect.name}}">
@@ -29,10 +35,10 @@
             </div>
             <div class="duration-div">
                 <i class="fas fa-clock"></i>
-                <span class="duration-span">{{ effect.duration.label }}</span>
+                <span class="duration-span">{{ effect.durationLabel }}</span>
             </div>
             <div class="stack-div">
-                <input type="number" class="stack-input" value="{{lookup (lookup effect.flags 'etheria-prompt') 'stack'}}">
+                <input type="number" class="stack-input" value="{{effect.stack}}">
             </div>
             <div class="button-panel">
                 <a class="effect-button toggle-effect" data-action="toggle-effect">
