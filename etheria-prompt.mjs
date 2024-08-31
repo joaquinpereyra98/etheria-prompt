@@ -5,7 +5,8 @@ import applyDamage from "./src/actors-methods/applyDamage.mjs";
 import useItem from "./src/actors-methods/useItem.mjs";
 import useCurativeItem from "./src/actors-methods/useCurativeItem.mjs";
 import { renderActorAETab, renderItemAETab } from "./src/active-effect/renderActiveEffectTab.mjs";
-import { renderStackInput } from "./src/active-effect/stacks-active-effect.mjs"
+import { renderStackInput } from "./src/active-effect/stacks-active-effect.mjs";
+import {onEndCombatRound} from "./src/combat/combat-round.mjs"
 
 Hooks.on("init", () => {
   console.log(`${ETHERIA_CONST.moduleName} | Initializing ${ETHERIA_CONST.moduleID}}`);
@@ -24,3 +25,5 @@ Hooks.on("ready", () => {
 Hooks.on('rendergActorSheet', renderActorAETab);
 Hooks.on('rendersItemSheet', renderItemAETab);
 Hooks.on('renderActiveEffectConfig', renderStackInput);
+
+Hooks.on("combatRound", onEndCombatRound);

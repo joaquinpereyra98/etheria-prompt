@@ -25,6 +25,24 @@ export default async function applyDamage(damage) {
   const updates = {
     "system.attributes.hp.value": Math.max(hp.value - deltaHP, 0),
   };
+  if(this.getActiveTokens(true)){
+    const tokens = this.getActiveTokens(true);
+    const text = `Apply ${deltaHP > 0 ? "Damage": "Heal"} ${Math.abs(deltaHP)}`;
+    for (const t of tokens) {
+      if ( !t.visible || !t.renderable ) continue;
+      canvas.interface.createScrollingText(t.center, text,{
+        duration: 2500,
+        anchor: CONST.TEXT_ANCHOR_POINTS.CENTER,
+        direction: deltaHP < 0 ? CONST.TEXT_ANCHOR_POINTS.TOP : CONST.TEXT_ANCHOR_POINTS.BOTTOM,
+        distance: (t.h*0.60),
+        jitter: 0.25,
+        fill: deltaHP > 0 ? "#d20000":"#009d00",
+        fontSize: 40,
+        fontWeight: "bold",
+        strokeThickness: 3
+      })
+    }
+  }
   return await this.update(updates);
 }
 
