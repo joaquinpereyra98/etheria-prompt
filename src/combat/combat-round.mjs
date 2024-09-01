@@ -38,6 +38,25 @@ export async function onEndCombatRound(combat, updateData, updateOptions) {
       ),
     });
 
+    const tokens = actor.getActiveTokens(true);
+    if (tokens) {
+      const text = `Recover Stamina and Mana`;
+      for (const t of tokens) {
+        if (!t.visible || !t.renderable) continue;
+        canvas.interface.createScrollingText(t.center, text, {
+          duration: 2500,
+          anchor: CONST.TEXT_ANCHOR_POINTS.CENTER,
+          direction: CONST.TEXT_ANCHOR_POINTS.TOP,
+          distance: t.h * 0.6,
+          jitter: 0.25,
+          fill: "#ffffff",
+          fontSize: 40,
+          fontWeight: "bold",
+          strokeThickness: 3,
+        });
+      }
+    }
+
     if (bleed.stack > 0) {
       await actor.applyDamage({ value: bleed.stack, type: "blood" });
       if(bleed.stack - 1 === 0) await bleed.effect.delete();

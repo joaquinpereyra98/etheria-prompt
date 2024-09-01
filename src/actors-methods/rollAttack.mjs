@@ -8,7 +8,6 @@ import ETHERIA_CONST from "../constants.mjs";
  * @param {boolean} [options.ignoreResistence] - Resistence affect on the damage calc?
  * @param {boolean} [options.maximizeDamageOnCritic] - Maximize damage roll when it's a critical hit?
  * @param {boolean} [options.applyEffectsOnHit] - Applu all item active effect on target actor on hit?
- * @returns 
  */
 export default async function rollAttack(attrKey, itemName, options = {}) {
   const { attributes } = this.system;
@@ -35,6 +34,7 @@ export default async function rollAttack(attrKey, itemName, options = {}) {
   const etheriaSockerHelper = game.modules.get(
     ETHERIA_CONST.moduleID
   ).etheriaSockerHelper;
+  ui.notifications.info(`${ETHERIA_CONST.moduleName} | Executing Actor#rollAttack`);
   // Emit the socket for GMs
   etheriaSockerHelper.emitForGM(
     ETHERIA_CONST.socketTypes.requestAttackGM,

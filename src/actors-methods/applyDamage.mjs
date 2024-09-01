@@ -16,8 +16,19 @@
  */
 export default async function applyDamage(damage) {
   const hp = this.system.attributes.hp;
-  const deltaHP = damage.isHealing 
-    ? calculateHeal.call(this, damage) 
+
+  /**
+   * A hook event that fires before a apply effects on the target.
+   * @function etheria-prompt.preApplyDamage
+   * @memberof hookEvents
+   * @param {Actor} actor - Actor Document to which the damage/heal will be applied
+   * @param {DamageDescription} damage - Source of damage or healing
+   * @returns {boolean} - Explicitly return `false` to prevent the roll.
+   */
+  if (Hooks.call("etheria-prompt.preApplyDamage", this, damage) === false) return;
+
+  const deltaHP = damage.isHealing
+    ? calculateHeal.call(this, damage)
     : calculateDamage.call(this, damage);
 
   if (!deltaHP) return this;
@@ -25,25 +36,43 @@ export default async function applyDamage(damage) {
   const updates = {
     "system.attributes.hp.value": Math.max(hp.value - deltaHP, 0),
   };
-  if(this.getActiveTokens(true)){
-    const tokens = this.getActiveTokens(true);
-    const text = `Apply ${deltaHP > 0 ? "Damage": "Heal"} ${Math.abs(deltaHP)}`;
+
+  const tokens = this.getActiveTokens(true);
+  if (tokens) {
+    const text = `Apply ${deltaHP > 0 ? "Damage" : "Heal"} ${Math.abs(
+      deltaHP
+    )}`;
     for (const t of tokens) {
-      if ( !t.visible || !t.renderable ) continue;
-      canvas.interface.createScrollingText(t.center, text,{
+      if (!t.visible || !t.renderable) continue;
+      canvas.interface.createScrollingText(t.center, text, {
         duration: 2500,
         anchor: CONST.TEXT_ANCHOR_POINTS.CENTER,
-        direction: deltaHP < 0 ? CONST.TEXT_ANCHOR_POINTS.TOP : CONST.TEXT_ANCHOR_POINTS.BOTTOM,
-        distance: (t.h*0.60),
+        direction:
+          deltaHP < 0
+            ? CONST.TEXT_ANCHOR_POINTS.TOP
+            : CONST.TEXT_ANCHOR_POINTS.BOTTOM,
+        distance: t.h * 0.6,
         jitter: 0.25,
-        fill: deltaHP > 0 ? "#d20000":"#009d00",
+        fill: deltaHP > 0 ? "#d20000" : "#009d00",
         fontSize: 40,
         fontWeight: "bold",
-        strokeThickness: 3
-      })
+        strokeThickness: 3,
+      });
     }
   }
-  return await this.update(updates);
+  const updatedActor = await this.update(updates);
+
+  /**
+   * A hook event that fires before a apply effects on the target.
+   * @function etheria-prompt.onApplyDamage
+   * @memberof hookEvents
+   * @param {Actor} actor - Updated Actor Document  which the damage/heal was be applied
+   * @param {DamageDescription} damage - Source of damage or healing
+   * @param {Number} deltaHP - The quantity of HP subtracted
+   */
+    Hooks.callAll("etheria-prompt.onApplyDamage", updatedActor, damage, deltaHP)
+
+  return updatedActor
 }
 
 /**
@@ -53,7 +82,8 @@ export default async function applyDamage(damage) {
  * @returns {number|false} - The final damage to apply, or false if an error occurred.
  */
 function calculateDamage(damage) {
-  const resistanceAttribute = this.system.attributes[`${damage.type}resistance`];
+  const resistanceAttribute =
+    this.system.attributes[`${damage.type}resistance`];
 
   if (damage.ignoreResistence || !resistanceAttribute) {
     return damage.value;
@@ -66,8 +96,10 @@ function calculateDamage(damage) {
     return false;
   }
 
-  let finalDamage = Math.floor(damage.value * (resistanceAttribute.value / 100));
-  
+  let finalDamage = Math.floor(
+    damage.value * (resistanceAttribute.value / 100)
+  );
+
   if (["bludgeoning", "piercing", "slashing"].includes(damage.type)) {
     finalDamage -= this.system.attributes.armorkeytest.value;
   }
@@ -82,9 +114,9 @@ function calculateDamage(damage) {
  * @returns {number|false} - The final healing amount, or false if an error occurred.
  */
 function calculateHeal(damage) {
-  if (this.effects.getName('Decayed')) return false;
+  if (this.effects.getName("Decayed")) return false;
 
-  const undead = game.system.api.ActorcItem_GetFromName(this, 'Undead');
-  
-  return (damage.type === 'holy' && undead) ? damage.value : -damage.value;
+  const undead = game.system.api.ActorcItem_GetFromName(this, "Undead");
+
+  return damage.type === "holy" && undead ? damage.value : -damage.value;
 }

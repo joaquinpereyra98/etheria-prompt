@@ -8,7 +8,7 @@ import {
   requestRollModifier,
   requestDamageModifier,
 } from "./requestModifiers.mjs";
-import rollAttack from "../actors-methods/rollAttack.mjs";
+
 /**
  *
  * @param {Actor} actor - Actor who executed the attack
@@ -28,41 +28,65 @@ export default async function onRollAttack(
   itemName,
   options = {}
 ) {
-  let attackRollData = await prepareRollData.call(
+  let accuracyRollData = await prepareRollData.call(
     actor,
     attackAttribute.attrID,
     attackAttribute.attrKey
   );
-  attackRollData.flavor = "Accuracy Roll";
-  attackRollData.options = {
+  accuracyRollData.flavor = "Accuracy Roll";
+  accuracyRollData.options = {
     maximizeDamageOnCritic: options.maximizeDamageOnCritic ?? true,
     applyEffectsOnHit: options.applyEffectsOnHit ?? true,
   };
   const targetsActor = game.users.get(user._id).targets.map((t) => t.actor);
+
+  const item = game.system.api.ActorcItem_GetFromName(actor, itemName);
+  const citem = await auxMeth.getcItem(item.id, item.ciKey);
+  const damageType = citem.system.attributes.damageType.value
+    ?.toLowerCase()
+    .trim();
 
   let { useData, rollDamageData } = await prepareRollDamageData(
     actor,
     itemName
   );
 
+  rollDamageData.damageType = damageType;
   rollDamageData.options = {
     isHealing: options.isHealing ?? false,
-    ignoreResistence: options.ignoreResistence ?? false,
+    ignoreResistence:
+      damageType === "true" || options.ignoreResistence ? true : false,
   };
 
   for (const target of targetsActor) {
     const targetAttributes = target.system.attributes;
-    attackRollData = await requestRollModifier(attackRollData, true);
+    accuracyRollData = await requestRollModifier(accuracyRollData, true);
 
     //set is attack critic for maximize the damage later.
-    rollDamageData.isCriticalHit = attackRollData.options.maximizeDamageOnCritic
-      ? attackRollData.iscrit
+    rollDamageData.isCriticalHit = accuracyRollData.options
+      .maximizeDamageOnCritic
+      ? accuracyRollData.iscrit
       : false;
 
+    /**
+     * A hook event that fires before of run Attack roll.
+     * @function etheria-prompt.preRollAttack
+     * @memberof hookEvents
+     * @param {Actor} actor - Actor document who was realize the attack.
+     * @param {Object} accuracyRollData - Attack roll data before of rollead in the Chat but after of GM modifer.
+     * @param {Actor} target - Actor document who was recieve the attack.
+     * @returns {boolean} - Explicitly return `false` to prevent the roll.
+     */
+    if (
+      Hooks.call("etheria-prompt.preRollAttack", actor, accuracyRollData) ===
+      false
+    )
+      return;
+
     //Request if the attack roll is valid.
-    await rollDataToMessage(actor, user, attackRollData);
+    await rollDataToMessage(actor, user, accuracyRollData);
     const isValidAttack = await createRequestingDialog(
-      attackRollData,
+      accuracyRollData,
       "Attack",
       {
         targetName: target.name,
@@ -90,6 +114,26 @@ export default async function onRollAttack(
       );
       reactionRollData.flavor = `${reactionKey.capitalize()} Roll`;
       reactionRollData = await requestRollModifier(reactionRollData);
+
+      /**
+       * A hook event that fires before of run Attack roll.
+       * @function etheria-prompt.preReactionRoll
+       * @memberof hookEvents
+       * @param {Actor} target - Actor document who was realize the reaction.
+       * @param {Object} reactionRollData - The data from the Reaction roll data before of be confirmed by GM.
+       * @param {Object} accuracyRollData - The data from the Attack roll triggered the reaction.
+       * @returns {boolean} - Explicitly return `false` to prevent the roll.
+       */
+      if (
+        Hooks.call(
+          "etheria-prompt.preReactionRoll",
+          target,
+          reactionRollData,
+          accuracyRollData
+        ) === false
+      )
+        break;
+
       const targetDodged = await createRequestingDialog(
         reactionRollData,
         "Reaction",
@@ -98,37 +142,44 @@ export default async function onRollAttack(
           reactionKey: reactionKey.capitalize(),
         }
       );
+      /**
+       * A hook event that fires before of run Attack roll.
+       * @function etheria-prompt.onReactionRoll
+       * @memberof hookEvents
+       * @param {Actor} target - Actor document who was realize the reaction.
+       * @param {Object} reactionRollData - The data from the Reaction roll.
+       * @param {Object} accuracyRollData - The data from the Attack roll.
+       */
+      Hooks.callAll(
+        "etheria-prompt.onReactionRoll",
+        target,
+        reactionRollData,
+        accuracyRollData
+      );
       //If GM select dont apply damage, dont rollDamage.
       if (!targetDodged) return;
       await rollDataToMessage(target, game.user, reactionRollData);
     }
 
-    //ROLL DAMAGE PART
-    const item = game.system.api.ActorcItem_GetFromName(actor, itemName);
-    const citem = await auxMeth.getcItem(item.id, item.ciKey);
-
-    const damageType = citem.system.attributes.damageType.value
-      ?.toLowerCase()
-      .trim();
-    if (damageType === "true") rollDamageData.options.ignoreResistence = true;
     rollDamageData = await requestDamageModifier(
       rollDamageData,
-      damageType,
+      rollDamageData.damageType,
       target.system.attributes
     );
 
     await target.applyDamage({
       value: rollDamageData.result,
-      type: rollDamageData.damageType ?? damageType,
+      type: rollDamageData.damageType,
       ignoreResistence: rollDamageData.options.ignoreResistence,
       isHealing: rollDamageData.options.isHealing,
     });
 
     //Apply active effecto to target if applyEffectsOnHit is true
-    if (attackRollData.options.applyEffectsOnHit) {
+    if (accuracyRollData.options.applyEffectsOnHit) {
       const targetEffects = target.effects;
       const newEffects = [];
       const effectsUpdates = [];
+      const deltaEffects = [];
       for (let ef of citem.effects) {
         const effectOnActor = targetEffects.getName(ef.name);
         if (effectOnActor) {
@@ -141,15 +192,73 @@ export default async function onRollAttack(
             _id: effectOnActor._id,
             [`flags.${ETHERIA_CONST.moduleID}.stack`]: itemStack + effectStack,
           });
+          deltaEffects.push({
+            id: effectOnActor._id,
+            stack: itemStack,
+            deltaStack: deltaEffects,
+          });
         } else {
           newEffects.push(ef.clone());
         }
       }
-      await target.createEmbeddedDocuments("ActiveEffect", newEffects);
+      /**
+       * A hook event that fires before a apply effects on the target.
+       * @function etheria-prompt.preApplyEffects
+       * @memberof hookEvents
+       * @param {Actor} target - Actor Document to which the effects will be applied
+       * @param {ActiveEffect[]} newEffects An array of ActiveEffect data to be created
+       * @param {Object[]} deltaEffects - An array of ids, stack value before the change and delta stack of the modified ActiveEffects
+       * @returns {boolean} - Explicitly return `false` to prevent apply effects.
+       */
+      if (
+        Hooks.call(
+          "etheria-prompt.preApplyEffects",
+          target,
+          newEffects,
+          deltaEffects
+        ) === false
+      )
+        continue;
+
+      const createdEffects = await target.createEmbeddedDocuments(
+        "ActiveEffect",
+        newEffects
+      );
       await target.updateEmbeddedDocuments("ActiveEffect", effectsUpdates);
+
+      /**
+       * A hook event that fires after a apply effects on the target.
+       * @function etheria-prompt.onApplyEffects
+       * @memberof hookEvents
+       * @param {Actor} target - Actor Document to which the effects was applied
+       * @param {ActiveEffect[]} createdEffects - An array of created ActiveEffect Documents instances
+       * @param {Object[]} effectsUpdates - An array of differential data objects, each used to update a single Active Effect Document
+       */
+      Hooks.callAll(
+        "etheria-prompt.onApplyEffects",
+        target,
+        createdEffects,
+        effectsUpdates
+      );
     }
   }
   await rollDataToMessage(actor, user, rollDamageData);
+
+  /**
+   * A hook event that fires after a Attack roll.
+   * @function etheria-prompt.onRollAttack
+   * @memberof hookEvents
+   * @param {Actor} actor
+   * @param {Object} accuracyRollData
+   * @param {Object} rollDamageData
+   */
+  Hooks.callAll(
+    "etheria-prompt.onRollAttack",
+    actor,
+    accuracyRollData,
+    rollDamageData
+  );
+
   //Active Item
   await actor.sheet.activateCI(
     useData.id,
