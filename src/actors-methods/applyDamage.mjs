@@ -31,7 +31,7 @@ export default async function applyDamage(damage) {
     ? calculateHeal.call(this, damage)
     : calculateDamage.call(this, damage);
 
-  if (!deltaHP) return this;
+  if (!deltaHP || deltaHP === 0) return this;
 
   const updates = {
     "system.attributes.hp.value": Math.max(hp.value - deltaHP, 0),
