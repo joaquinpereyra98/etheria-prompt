@@ -2,7 +2,7 @@
     "id": "etheria-prompt",
     "title": "Etheria Prompt Module",
     "description": "",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "compatibility": {
         "minimun": "11",
         "verified": "11"
@@ -16,7 +16,7 @@
         }
     ],
     "url": "https://github.com/joaquinpereyra98/etheria-prompt",
-    "download": "https://github.com/joaquinpereyra98/etheria-prompt/releases/download/v1.2.0/etheria-prompt.zip",
+    "download": "https://github.com/joaquinpereyra98/etheria-prompt/releases/download/v1.2.1/etheria-prompt.zip",
     "manifest": "https://raw.githubusercontent.com/joaquinpereyra98/etheria-prompt/main/module.json",
     "socket": true,
     "readme": "README.md",
