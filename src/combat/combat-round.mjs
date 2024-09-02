@@ -71,8 +71,8 @@ export async function onEndCombatRound(combat, updateData, updateOptions) {
 
     if(burn.stack > 0) {
       await actor.applyDamage({ value: burn.stack * 2, type: "fire" });
-      if(Math.floor(burn.stack / 2) === 0) await burn.effect.delete()
-      else await burn.effect.setFlag(ETHERIA_CONST, stack, Math.floor(burn.stack / 2))
+      if(Math.floor(burn.stack*0.5) === 0) await burn.effect.delete()
+      else await burn.effect.setFlag(ETHERIA_CONST.moduleID, "stack", Math.floor(burn.stack*0.5))
     }
   }
 }
