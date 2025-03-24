@@ -4,20 +4,23 @@
 .etheria-prompt {
     --groove-border: groove #eeeeee;
 }
+
 .etheria-prompt.dialog-content .dice-div {
     margin: 4px 0;
     border: 2px var(--groove-border);
     padding: 5px 2px;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255, 255, 255, 0.2);
     display: flex;
 }
+
 .etheria-prompt.dialog-content .dice-div .die-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
-.etheria-prompt.dialog-content .dice-div .die-icon{
+
+.etheria-prompt.dialog-content .dice-div .die-icon {
     font-size: x-large;
     background-image: url(../../../icons/svg/d20-grey.svg);
     width: 40px;
@@ -27,6 +30,7 @@
     justify-content: center;
     font-weight: bold;
 }
+
 .etheria-prompt.dialog-content .dice-div .formula-container {
     font-size: 15px;
     width: 80%;
@@ -37,6 +41,7 @@
     padding-left: 10px;
     margin-left: 5px;
 }
+
 .etheria-prompt.dialog-content .etheria-checkbox {
     display: flex;
     align-items: center;
@@ -44,13 +49,16 @@
     position: relative;
     margin: 2px 0;
 }
+
 .etheria-prompt.dialog-content .etheria-checkbox:hover {
-    background: rgba(0,0,0,0.1);
+    background: rgba(0, 0, 0, 0.1);
 }
+
 .etheria-prompt.dialog-content .etheria-checkbox img {
     width: 30px;
     border: 0;
 }
+
 .etheria-prompt.dialog-content .etheria-checkbox div {
     display: flex;
     justify-content: space-between;
@@ -59,23 +67,28 @@
     margin: 0 2px;
     border-left: 2px var(--groove-border);
 }
+
 .etheria-prompt.dialog-content .etheria-checkbox span {
     font-size: 17px;
 }
+
 .etheria-prompt.dialog-content .etheria-checkbox input[type=radio] {
     height: 17px;
     width: 15px;
     cursor: pointer;
 }
+
 .etheria-prompt.dialog-content .roll-modifer-container .optional-modifier {
     display: flex;
     align-items: center;
 }
+
 .etheria-prompt.active-effect-section {
     padding: 0 0.6em;
 }
+
 .etheria-prompt.active-effect-section .effect-header {
-    background: rgba(0,0,0,0.6);
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     font-size: large;
@@ -86,36 +99,42 @@
 .etheria-prompt.active-effect-section .effect-header .name-header {
     flex: 2;
 }
+
 .etheria-prompt.active-effect-section .effect-header .duration-header {
     text-align: center;
     flex: 1;
 }
+
 .etheria-prompt.active-effect-section .effect-header .action-headers {
     text-align: end;
     flex: 1;
     display: flex;
     flex-direction: column;
 }
+
 .etheria-prompt.active-effect-section .effect-header .action-headers a {
     color: rgba(255, 255, 255, 0.7);
     transition-duration: 0.08s;
     font-size: 15px;
 }
+
 .etheria-prompt.active-effect-section .effect-header .action-headers a:hover {
     color: white;
     font-size: 16px;
 }
+
 .etheria-prompt.active-effect-section .effect-list {
     padding: 0;
     margin: 0;
 }
-.etheria-prompt.active-effect-section .effect-list li{
+
+.etheria-prompt.active-effect-section .effect-list li {
     list-style: none;
     display: flex;
     align-items: center;
     border-bottom: 1px white solid;
-    background-color: rgba(0,0,0,0.12);
-    padding: 0.2em 0 ;
+    background-color: rgba(0, 0, 0, 0.12);
+    padding: 0.2em 0;
 }
 
 .etheria-prompt.active-effect-section .effect-list .effect-image {
@@ -136,17 +155,21 @@
     align-items: center;
     font-size: large;
 }
+
 .etheria-prompt.active-effect-section .effect-list .duration-div {
     flex: 1;
     text-align: center;
 }
+
 .etheria-prompt.active-effect-section .effect-list .stack-div {
     flex: 1;
     text-align: center;
 }
+
 .etheria-prompt.active-effect-section .effect-list .stack-div input {
     width: 40%;
 }
+
 .etheria-prompt.active-effect-section .effect-list .button-panel {
     display: flex;
     flex: 1;
@@ -160,19 +183,22 @@
 
 .etheria-prompt.active-effect-section .effect-list .button-panel a {
     margin: 0 3px;
-    color: rgba(0,0,0,0.6);
+    color: rgba(0, 0, 0, 0.6);
     transition-duration: 0.08s;
 }
+
 .etheria-prompt.active-effect-section .effect-list .button-panel a:hover {
     text-shadow: 0;
     color: black;
-    transform: scale(1.1);    
+    transform: scale(1.1);
 }
+
 .etheria-prompt.import-effect-dialog {
     max-height: 500px;
     overflow-y: scroll;
     padding: 0 5px;
 }
+
 .etheria-prompt.import-effect-dialog .effect-section {
     display: flex;
     align-items: center;
@@ -181,18 +207,105 @@
     border: 2px var(--groove-border);
     padding: 2px 5px;
 }
+
 .etheria-prompt.import-effect-dialog .effect-section:hover {
-    background: rgba(0,0,0,0.1);
+    background: rgba(0, 0, 0, 0.1);
 }
+
 .etheria-prompt.import-effect-dialog .effect-section img {
     width: 15%;
     border: 0;
     margin-right: 5px;
 }
-.etheria-prompt.import-effect-dialog .effect-section .effect-name{
+
+.etheria-prompt.import-effect-dialog .effect-section .effect-name {
     width: 70%;
     font-size: large;
 }
+
 .etheria-prompt.import-effect-dialog .effect-section .check-div {
     width: 15%;
+}
+
+.etheria-effect-manager .token-list {
+    padding: 0;
+    margin: 0;
+}
+
+.etheria-effect-manager .token-item:not(:last-child) {
+    border-bottom: 2px groove;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}
+
+.etheria-effect-manager .token-portait {
+    flex: 0 0 48px;
+    height: 48px;
+    border: 0;
+    cursor: pointer;
+}
+
+.etheria-effect-manager .effects-list {
+    align-items: center;
+    overflow-x: auto;
+    border-left: 2px groove;
+    padding-left: 3px;
+    margin-left: 5px;
+    flex-wrap: nowrap;
+    overflow-y: hidden;
+}
+
+.etheria-effect-manager .effect-portait {
+    flex: 0 0 40px;
+    border: 0;
+    margin: 2px;
+    position: relative;
+    height: 40px;
+}
+
+.etheria-effect-manager .effect-portait .effect-img {
+    transition: 500ms;
+    background-color: rgba(255, 255, 255, 0.1);
+    object-fit: cover;
+    object-position: 50% 0;
+}
+
+.etheria-effect-manager .effect-portait:hover .effect-img {
+    transform: scale(1.1);
+}
+
+.etheria-effect-manager .effect-portait .delete-effect-anchor {
+    position: absolute;
+    right: 0;
+    opacity: 0;
+    transition: 200ms;
+    border-radius: 50%;
+    background: rgba(190, 0, 0, 0.8);
+    color: white;
+}
+
+.etheria-effect-manager .effect-portait .effect-stack-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    font-weight: bold;
+    font-size: 30px;
+    line-height: 30px;
+    color: white;
+    -webkit-text-stroke: 2px black;
+    pointer-events: none;
+}
+
+.etheria-effect-manager .effect-portait:hover .delete-effect-anchor {
+    opacity: 1;
+}
+
+.etheria-effect-manager .token-control {
+    flex: 0 0 25px;
+    display: flex;
+    font-size: 15px;
+    align-items: center;
+    justify-content: center;
+    border-left: 2px groove;
+    margin-left: 5px;
 }

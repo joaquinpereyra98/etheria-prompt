@@ -18,11 +18,14 @@ export async function onEndCombatRound(combat, updateData, updateOptions) {
       stamina_prop,
       staminamax,
     } = actor.system.attributes;
-    const { bleed, poison, regain, burn } = findCombatEffect(actor.effects);
+    const { bleed, poison, regain, burn } = findCombatEffects(actor.effects);
+
+    const bleedStack = bleed.reduce((sum, e) => sum + e.stack, 0);
 
     if (regain.stack > 0) {
+      const regainStack = regain.reduce((sum, e) => sum + e.stack, 0);
       await actor.applyDamage({
-        value: bleed.stack > 0 ? regain.stack / 2 : regain.stack,
+        value: bleedStack > 0 ? regainStack / 2 : regainStack,
         type: "Healing",
         isHealing: true,
       });
@@ -57,39 +60,42 @@ export async function onEndCombatRound(combat, updateData, updateOptions) {
       }
     }
 
-    if (bleed.stack > 0) {
-      await actor.applyDamage({ value: bleed.stack, type: "blood" });
-      if(bleed.stack - 1 === 0) await bleed.effect.delete();
-      else await bleed.effect.setFlag(ETHERIA_CONST.moduleID, "stack", bleed.stack - 1);
+    await actor.applyDamage({ value: bleedStack, type: "blood" });
+    for (const bleedEffect of bleed) {
+      if (bleedEffect.stack - 1 === 0) await bleedEffect.effect.delete();
+      else await bleedEffect.effect.setFlag(ETHERIA_CONST.moduleID, "stack", bleedEffect.stack - 1);
     }
 
-    if (poison.stack > 0) {
-      await actor.applyDamage({ value: poison.stack, type: "nature" });
-      if(poison.stack - 1 === 0) await poison.effect.delete();
-      else await poison.effect.setFlag(ETHERIA_CONST.moduleID, "stack", poison.stack - 1);
+    const poisonStack = poison.reduce((sum, e) => sum + e.stack, 0);
+    await actor.applyDamage({ value: poisonStack, type: "nature" });
+    for (const poisonEffect of poison) {
+      if (poisonEffect.stack - 1 === 0) await poisonEffect.effect.delete();
+      else await poisonEffect.effect.setFlag(ETHERIA_CONST.moduleID, "stack", poisonEffect.stack - 1);
     }
 
-    if(burn.stack > 0) {
-      await actor.applyDamage({ value: burn.stack * 2, type: "fire" });
-      if(Math.floor(burn.stack*0.5) === 0) await burn.effect.delete()
-      else await burn.effect.setFlag(ETHERIA_CONST.moduleID, "stack", Math.floor(burn.stack*0.5))
+    const burnStack = burn.reduce((sum, e) => sum + e.stack, 0);
+    await actor.applyDamage({ value: burnStack * 2, type: "fire" });
+    for (const burnEffect of burn) {
+      if (Math.floor(burnEffect.stack * 0.5) === 0) await burnEffect.effect.delete();
+      else await burnEffect.effect.setFlag(ETHERIA_CONST.moduleID, "stack", Math.floor(burnEffect.stack * 0.5));
     }
   }
 }
 
-function findCombatEffect(effects) {
-  const getEffect = (name) => {
-    const effect = effects.getName(name);
-    return {
-      effect: effect || {},
-      stack: effect?.getFlag(ETHERIA_CONST.moduleID, "stack") ?? 0,
-    };
+function findCombatEffects(effects) {
+  const getEffects = (name) => {
+    return effects
+      .filter((e) => e.name === name)
+      .map((effect) => ({
+        effect: effect,
+        stack: effect?.getFlag(ETHERIA_CONST.moduleID, "stack") ?? 0,
+      }));
   };
 
   return {
-    bleed: getEffect("Bleed"),
-    poison: getEffect("Poison"),
-    regain: getEffect("Healing Over Time"),
-    burn: getEffect("Burning")
+    bleed: getEffects("Bleed"),
+    poison: getEffects("Poison"),
+    regain: getEffects("Healing Over Time"),
+    burn: getEffects("Burning"),
   };
 }

@@ -101,7 +101,7 @@ function calculateDamage(damage) {
   );
 
   if (["bludgeoning", "piercing", "slashing"].includes(damage.type)) {
-    finalDamage -= this.system.attributes.armorkeytest.value;
+    finalDamage = Math.max(finalDamage - this.system.attributes.armorkeytest.value, 0);
   }
 
   return finalDamage;

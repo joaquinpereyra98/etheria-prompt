@@ -36,7 +36,6 @@ export async function renderActorAETab(app, $html, data) {
           const li = element.closest(".active-effect-item");
           const effectID = li.dataset.effectId;
           const effect = effects.get(effectID);
-          console.log(effect);
           await effect.update({ disabled: !effect.disabled });
         }
         break;
@@ -107,7 +106,7 @@ export async function renderItemAETab(app, $html, data) {
   const isDFredEffect = !!game.modules.get("dfreds-convenient-effects");
   const activeEffectSection = await renderTemplate(
     `modules/${ETHERIA_CONST.moduleID}/templates/item-active-effect-tab.hbs`,
-    { effects,  isDFredEffect}
+    { effects, isDFredEffect }
   );
   $sheetBody.append(activeEffectSection);
 

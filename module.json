@@ -37,5 +37,19 @@
     ],
     "styles": [
         "etheria-prompt.css"
-    ]
+    ],
+    "flags": {
+        "hotReload": {
+            "extensions": [
+                "css",
+                "hbs",
+                "json"
+            ],
+            "paths": [
+                "etheria-prompt.css",
+                "templates",
+                "lang"
+            ]
+        }
+    }
 }

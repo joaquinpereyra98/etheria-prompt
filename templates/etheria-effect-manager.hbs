@@ -1,0 +1,28 @@
+<div>
+    <ol class="token-list flexcol scrollable">
+        {{#each tokens as |token|}}
+        <li class="token-item flexrow" data-token-uuid="{{token.uuid}}">
+            <div class="token-portait">
+                <img src="{{token.texture.src}}" alt="{{token.name}}" data-action="spanToken"
+                    data-tooltip="{{token.name}}">
+            </div>
+            <div class="effects-list flexrow">
+                {{#each token.effects as |effect|}}
+                <div class="effect-portait" data-effect-uuid="{{effect.uuid}}">
+                    <img src="{{effect.img}}" alt="{{effect.name}}" class="effect-img" data-tooltip="{{effect.name}}">
+                    <a class="delete-effect-anchor fa-regular fa-circle-xmark" data-action="deleteEffect"
+                        data-tooltip="Delete Effect"></a>
+                    {{#if effect.flags.etheria-prompt.stack}}
+                    <label class="effect-stack-label">{{effect.flags.etheria-prompt.stack}}</label>
+                    {{/if}}
+                </div>
+                {{/each}}
+            </div>
+            <div class="token-control">
+                <a class="fa-solid fa-trash delete-button" data-tooltip="Delete All Effects"
+                    data-action="deleteAllEffects"></a>
+            </div>
+        </li>
+        {{/each}}
+    </ol>
+</div>

@@ -6,7 +6,10 @@ import useItem from "./src/actors-methods/useItem.mjs";
 import useCurativeItem from "./src/actors-methods/useCurativeItem.mjs";
 import { renderActorAETab, renderItemAETab } from "./src/active-effect/renderActiveEffectTab.mjs";
 import { renderStackInput } from "./src/active-effect/stacks-active-effect.mjs";
-import {onEndCombatRound} from "./src/combat/combat-round.mjs"
+import { onEndCombatRound } from "./src/combat/combat-round.mjs"
+import applyDamageToGroup from "./src/macros/apply-damage-to-group.mjs";
+import EtheriaEffectManager from "./src/active-effect/activeEffectManager.mjs";
+import getSceneControls from "./src/active-effect/getSceneControl.mjs";
 
 Hooks.on("init", () => {
   console.log(`${ETHERIA_CONST.moduleName} | Initializing ${ETHERIA_CONST.moduleID}}`);
@@ -20,10 +23,22 @@ Hooks.on("init", () => {
 Hooks.on("ready", () => {
   game.modules.get(ETHERIA_CONST.moduleID).etheriaSockerHelper =
     new etheriaSockerHelper();
+
+  game.etheriaHelper = {
+    applyDamageToGroup,
+    effectManager: new EtheriaEffectManager(),
+  }
 });
+
 
 Hooks.on('rendergActorSheet', renderActorAETab);
 Hooks.on('rendersItemSheet', renderItemAETab);
 Hooks.on('renderActiveEffectConfig', renderStackInput);
-
 Hooks.on("combatRound", onEndCombatRound);
+Hooks.on("getSceneControlButtons", getSceneControls);
+Hooks.on("deleteActiveEffect", EtheriaEffectManager.onChangeActiveEffect);
+Hooks.on("updateActiveEffect", EtheriaEffectManager.onChangeActiveEffect);
+Hooks.on("createActiveEffect", EtheriaEffectManager.onChangeActiveEffect);
+Hooks.on("deleteToken", EtheriaEffectManager.onChangeToken);
+Hooks.on("updateToken", EtheriaEffectManager.onChangeToken);
+Hooks.on("createToken", EtheriaEffectManager.onChangeToken);
