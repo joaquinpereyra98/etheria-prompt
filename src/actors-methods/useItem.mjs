@@ -10,12 +10,11 @@ import ETHERIA_CONST from "../constants.mjs";
  */
 export default async function useItem(attrKey, itemName, options = {}) {
     const { attributes } = this.system;
-  if (!typeof attrKey === "string" || !attributes[attrKey]) {
-    ui.notifications.error(
-      `${ETHERIA_CONST.moduleName} | Error executing Actor#useItem | "${attrKey}" not is a valid attribute key`
-    );
-    return;
+
+   if (!attributes[attrKey] || !itemName) {
+    return this.pickItem({attribute: attrKey, itemName, action: "use"});
   }
+
   const socketData = {
     userUuid: game.user.uuid,
     actorUuid: this.uuid,

@@ -9,13 +9,10 @@ import ETHERIA_CONST from "../constants.mjs";
  * @param {boolean} [options.maximizeDamageOnCritic] - Maximize damage roll when it's a critical hit?
  * @param {boolean} [options.applyEffectsOnHit] - Applu all item active effect on target actor on hit?
  */
-export default async function rollAttack(attrKey, itemName, options = {}) {
+export default async function rollAttack(attrKey = "", itemName="", options = {}) {
   const { attributes } = this.system;
-  if (!typeof attrKey === "string" || !attributes[attrKey]) {
-    ui.notifications.error(
-      `${ETHERIA_CONST.moduleName} | Error executing Actor#rollAttack | "${attrKey}" not is a valid attribute key`
-    );
-    return;
+  if (!attributes[attrKey] || !itemName) {
+    return this.pickItem({attribute: attrKey, itemName, action: "attack"});
   }
   if (game.user.targets.size === 0) {
     ui.notifications.error(

@@ -1,0 +1,29 @@
+<form class="etheria-item-picker">
+  <!-- Attribute Selection -->
+  <div class="form-group">
+    <label for="attribute-input">Attribute:</label>
+    <div class="form-fields">
+      <input type="text" name="attribute" value="{{attributeField.selected}}" list="{{attributeField.id}}"
+        autocomplete="off" placeholder="Select attribute">
+      <datalist id="{{attributeField.id}}">
+        {{#each attributeField.choices as |attribute|}}
+        <option value="{{attribute}}">{{attribute}}</option>
+        {{/each}}
+      </datalist>
+    </div>
+  </div>
+
+  <!-- Item Selection -->
+  <div class="form-group">
+    <label for="item-select">cItem:</label>
+    <div class="form-fields">
+      <select name="itemName" class="etheria-item-select">
+        {{#select itemField.selected}}
+        {{#each itemField.choices as |label key|}}
+        <option value="{{key}}">{{label}}</option>
+        {{/each}}
+        {{/select}}
+      </select>
+    </div>
+  </div>
+</form>
