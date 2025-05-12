@@ -5,6 +5,9 @@ import ETHERIA_CONST from "../constants.mjs";
  * @param {ApplicationHeaderButton[]} buttons 
  */
 export default function onGetHeaderButtons(app, buttons) {
+  
+  if(!game.user.isGM) return;
+
   buttons.unshift({
     label: "Export",
     class: "export-template",
