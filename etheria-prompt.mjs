@@ -4,12 +4,15 @@ import etheriaSockerHelper from "./src/socket-helper.mjs";
 /* Actor Methods */
 import * as actorMethods from "./src/actors-methods/_module.mjs";
 
+/* Measured Template */
+import * as measuredTemplates from "./src/measured-template/_module.mjs";
+
 import { renderActorAETab, renderItemAETab } from "./src/active-effect/renderActiveEffectTab.mjs";
 import { renderStackInput } from "./src/active-effect/stacks-active-effect.mjs";
 import { onEndCombatRound } from "./src/combat/combat-round.mjs"
 import applyDamageToGroup from "./src/macros/apply-damage-to-group.mjs";
 import EtheriaEffectManager from "./src/active-effect/activeEffectManager.mjs";
-import getSceneControls from "./src/active-effect/getSceneControl.mjs";
+import getSceneControls from "./src/getSceneControl.mjs";
 
 Hooks.on("init", () => {
   console.log(`${ETHERIA_CONST.moduleName} | Initializing ${ETHERIA_CONST.moduleID}}`);
@@ -19,6 +22,7 @@ Hooks.on("init", () => {
     const method = actorMethods[methodKey];
     CONFIG.Actor.documentClass.prototype[methodKey] = method;
   }
+  measuredTemplates.registerSetting();
 });
 
 Hooks.on("ready", () => {
@@ -28,7 +32,8 @@ Hooks.on("ready", () => {
   game.etheriaHelper = {
     applyDamageToGroup,
     effectManager: new EtheriaEffectManager(),
-  }
+    templateManager: new measuredTemplates.EtheriaTemplateManager(),
+  };
 });
 
 
@@ -43,3 +48,4 @@ Hooks.on("createActiveEffect", EtheriaEffectManager.onChangeActiveEffect);
 Hooks.on("deleteToken", EtheriaEffectManager.onChangeToken);
 Hooks.on("updateToken", EtheriaEffectManager.onChangeToken);
 Hooks.on("createToken", EtheriaEffectManager.onChangeToken);
+Hooks.on("getMeasuredTemplateConfigHeaderButtons", measuredTemplates.onGetHeaderButtons);

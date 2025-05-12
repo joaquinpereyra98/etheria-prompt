@@ -1,0 +1,30 @@
+<div>
+  <ol class="templates-list flexcol scrollable">
+    {{#each worldTemplates as |template|}}
+    <li class="template-item flexrow" data-template-id="{{template._id}}">
+      <a class="place-icon" data-action="placeTemplate">
+        <span class="fa-stack fa-small">
+          <i class="fa-regular fa-expand fa-stack-2x template-icon"></i>
+          <i class="fa-regular {{lookup @root.tempalteIcons template.t}} fa-stack-1x"></i>
+        </span>
+      </a>
+      <div class="template-name" data-tooltip="{{template.name}}">
+        {{template.name}}
+        {{#if @root.isGM}}
+        <div class="tags">
+          {{#each template.users as |id|}}
+          <span class="tag">{{lookup @root.users id}}</span>
+          {{/each}}
+        </div>
+        {{/if}}
+      </div>
+      {{#if @root.isGM}}
+      <div class="template-controls">
+        <a class="fa-solid fa-pen-to-square" data-action="editTemplate"></a>
+        <a class="fa-solid fa-trash" data-action="deleteTemplate"></a>
+      </div>
+      {{/if}}
+    </li>
+    {{/each}}
+  </ol>
+</div>

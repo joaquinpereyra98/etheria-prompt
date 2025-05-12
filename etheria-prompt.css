@@ -309,3 +309,57 @@
     border-left: 2px groove;
     margin-left: 5px;
 }
+
+.etheria-template-manager .window-content {
+    padding: 0;
+}
+
+.etheria-template-manager .templates-list {
+    padding: 0;
+    gap: 3px;
+}
+
+.etheria-template-manager .place-icon {
+    font-size: 20px;
+    flex: 0;
+
+    .template-icon {
+        color: rgba(0, 0, 0, 0.5);
+    }
+}
+
+.etheria-template-manager .template-item {
+    align-items: center;
+    padding: 0 5px;
+    border-width: 2px 0;
+    border-style: groove;
+
+    &:hover {
+        background: rgba(0, 0, 0, 0.1);
+    }
+}
+
+.etheria-template-manager .template-name {
+    font-size: 20px;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+
+    .tags {
+        margin: 2px 0;
+        display: flex;
+        opacity: 0.6;
+
+        .tag {
+            font-size: 12px;
+            border: 2px solid;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+    }
+}
+
+.etheria-template-manager .template-controls {
+    font-size: 15px;
+    flex: 0;
+}

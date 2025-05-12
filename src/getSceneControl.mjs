@@ -14,6 +14,19 @@ export default function getSceneControls(controls) {
             const efManager = game.etheriaHelper.effectManager;
             efManager.render(!efManager.rendered);
         }
-    })
+    });
+
+    
+    const templateControls = controls.find(c => c.name === "measure");
+    templateControls.tools.push({
+        name: "etheria-template-manager",
+        title: "Open Etheria Template Manager",
+        icon: "fa-solid fa-box-archive",
+        button: true,
+        onClick: () => {
+            const efManager = game.etheriaHelper.templateManager;
+            efManager.render(!efManager.rendered);
+        }
+    });
     return controls;
 }

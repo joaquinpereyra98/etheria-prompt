@@ -6,6 +6,9 @@ const ETHERIA_CONST = {
     requestAttackGM: "REQUEST_ATTACK_GM",
     requestItemUseGM: "REQUEST_ITEM_GM",
   },
+  SETTING: {
+    WORLD_TEMPLATES: "WORLD-MEASURED-TEMPLATES",
+  }
 };
 ETHERIA_CONST.reactionOption = {
   none: {
