@@ -26,10 +26,12 @@ export default async function onItemUse(
   accuracyRollData.options = {
     maximizeDamageOnCritic: options.maximizeDamageOnCritic ?? false,
   };
-  accuracyRollData = await requestRollModifier(accuracyRollData, false);
-
   const item = game.system.api.ActorcItem_GetFromName(actor, itemName);
   const citem = await auxMeth.getcItem(item.id, item.ciKey);
+  accuracyRollData.item = citem;
+  
+  accuracyRollData = await requestRollModifier(accuracyRollData, false);
+  
 
   /**
    * A hook event that fires before of a use Item and roll the accuracy roll.

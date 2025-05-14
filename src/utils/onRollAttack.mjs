@@ -39,9 +39,11 @@ export default async function onRollAttack(
     applyEffectsOnHit: options.applyEffectsOnHit ?? true,
   };
   const targetsActor = game.users.get(user._id).targets.map((t) => t.actor);
-
+  
   const item = game.system.api.ActorcItem_GetFromName(actor, itemName);
   const citem = await auxMeth.getcItem(item.id, item.ciKey);
+  accuracyRollData.item = citem;
+
   const damageType = citem.system.attributes.damageType.value
     ?.toLowerCase()
     .trim();
@@ -113,6 +115,7 @@ export default async function onRollAttack(
         reactionKey
       );
       reactionRollData.flavor = `${reactionKey.capitalize()} Roll`;
+      reactionRollData.item = citem;
       reactionRollData = await requestRollModifier(reactionRollData);
 
       /**

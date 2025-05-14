@@ -8,15 +8,17 @@ import ETHERIA_CONST from "../constants.mjs";
  * @returns {Promise<object>} - The updated roll data or old roll data if no changes were made.
  */
 export async function requestRollModifier(rollData, isAttackRoll = false) {
-  const { roll, actor, flavor, options } = rollData;
+  const { roll, actor, flavor, options, item } = rollData;
+
+  console.log(rollData)
 
   const content = await renderTemplate(
     `modules/${ETHERIA_CONST.moduleID}/templates/modifier-dialog-template.hbs`,
-    { diceData: roll.terms[0], actor, label: flavor, isAttackRoll, options }
+    { diceData: roll.terms[0], actor, label: flavor, isAttackRoll, options, item }
   );
 
   const newRollData = await Dialog.prompt({
-    title: `Choose the modifier for the ${flavor} made by: ${actor}`,
+    title: `${flavor} by ${actor}`,
     content,
     label: "Roll!",
     callback: (html) => {
@@ -37,9 +39,8 @@ export async function requestRollModifier(rollData, isAttackRoll = false) {
         formula = formula.replace(/\d+d20/, `${numDice}d20kh`);
       }
       if (mods && mods !== "+0") {
-        mods = ` ${
-          mods.startsWith("+") || mods.startsWith("-") ? mods : "+" + mods
-        }`;
+        mods = ` ${mods.startsWith("+") || mods.startsWith("-") ? mods : "+" + mods
+          }`;
         formula += mods;
         mod += mods;
       }
@@ -51,7 +52,7 @@ export async function requestRollModifier(rollData, isAttackRoll = false) {
 
       return { formula, maximizeDamageOnCritic, mod, applyEffectsOnHit };
     },
-    close: () => {}
+    close: () => { }
   });
 
   if (
@@ -148,7 +149,7 @@ export async function requestDamageModifier(
         damageType: selectedDamageType,
       };
     },
-    close: () => {}
+    close: () => { }
   });
 
   if (!Roll.validate(newRollData.formula)) return rollData;
