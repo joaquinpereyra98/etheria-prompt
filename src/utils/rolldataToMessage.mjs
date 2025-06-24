@@ -53,6 +53,7 @@ function getValues(user, rtypevalue){
     case CONST.DICE_ROLL_MODES.BLIND:
       rvalue = CONST.CHAT_MESSAGE_TYPES.WHISPER;
       whisper = ChatMessage.getWhisperRecipients("GM");
+      break;
     case CONST.DICE_ROLL_MODES.SELF:
       whisper = ChatMessage.getWhisperRecipients(user);
       rvalue = CONST.CHAT_MESSAGE_TYPES.WHISPER;
