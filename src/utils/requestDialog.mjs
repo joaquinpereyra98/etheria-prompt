@@ -7,7 +7,6 @@ import ETHERIA_CONST from "../constants.mjs";
  * @returns {Promise<(string)>} 
  */
 export default async function createRequestingDialog(rollData, requestType, options = {}) {
-  console.log(rollData);
   const dialogOptions = {
     Attack: {
       title: `Attack roll performed against ${options.targetName}`,

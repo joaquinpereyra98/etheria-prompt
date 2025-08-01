@@ -2,4 +2,5 @@ module.zip
 node_modules/
 foundry
 public
+.vscode
 etheria-prompt.zip

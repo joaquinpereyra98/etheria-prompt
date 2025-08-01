@@ -3,19 +3,14 @@
     "module": "ES6",
     "target": "ES6"
   },
-  "exclude": [
-    "node_modules",
-    "**/node_modules/*"
-  ],
+  "exclude": ["node_modules", "**/node_modules/*"],
   "include": [
     "etheria-prompt.mjs",
-    "v11/**/**.js",
-    "sandbox/**/**.js",
-    "src/**/**.mjs"
+    "src/**/**.mjs",
+    "foundry/client/**/*.js",
+    "foundry/**/*.mjs"
   ],
   "typeAcquisition": {
-    "include": [
-      "jquery"
-    ]
+    "include": ["jquery"]
   }
 }

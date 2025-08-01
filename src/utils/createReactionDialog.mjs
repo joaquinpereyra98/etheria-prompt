@@ -18,13 +18,11 @@ export default async function createReactionDialog(target) {
       return html.find("input[name=reactionOption]:checked").val();
     },
     rejectClose: false,
+    height: "280px",
     render: (html) => {
       html.find(".etheria-checkbox").click((ev) => {
         $(ev.currentTarget).find('input[type="radio"]').prop("checked", true);
       });
-    },
-    options: {
-      height: 267,
     },
   });
 }

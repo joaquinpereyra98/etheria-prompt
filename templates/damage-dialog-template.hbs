@@ -1,16 +1,16 @@
-<div class="etheria-prompt dialog-content">
+<form class="etheria-prompt dialog-content">
     <span>Choose the modifier for the <b>Damage Roll</b> made by: <b>{{actor}}</b></span>
     <div class="roll-modifer-container">
         <fieldset>
             <legend>Select Modifiers</legend>
-            Numberal Modifiers: <input name='numMod' type='text' value="" placeholder="+4" >
+            Numberal Modifiers: <input name='numMod' type='text' value="" placeholder="+4">
             Percentage Modifiers: <input name='pctMod' type='text' value="" placeholder="+10%">
         </fieldset>
         <fieldset>
             <legend> Select Data Type</legend>
             Damage Type:
             <select name="damageType">
-                 {{selectOptions damageOption selected=damageType}}
+                {{selectOptions damageOption selected=damageType}}
             </select>
         </fieldset>
         <fieldset>
@@ -22,5 +22,14 @@
                 Is Healing? <input type="checkbox" name="isHealing" {{checked options.isHealing}}>
             </div>
         </fieldset>
+        <fieldset>
+            <legend>Override Dice Results</legend>
+            <label>
+                Use custom dice results? <input type="checkbox" name="useOverride" checked>
+            </label>
+            <p class="hint">If checked, you can input custom values for each die. Leave a field empty to use the rolled
+                value.</p>
+            <div class="override-inputs"></div>
+        </fieldset>
     </div>
-</div>
+</form>

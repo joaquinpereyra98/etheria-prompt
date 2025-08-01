@@ -1,4 +1,4 @@
-<div class="etheria-prompt dialog-content">
+<form class="etheria-prompt dialog-content">
     <span>
         Choose the modifier for the <b>{{label}}</b> performed by <b>{{actor}}</b> using <b>{{item.name}}</b>
     </span>
@@ -22,5 +22,13 @@
             </div>
         </fieldset>
         {{/if}}
+        <fieldset>
+            <legend>Override Dice Results</legend>
+            <label>
+                Use custom dice results? <input type="checkbox" name="useOverride">
+            </label>
+            <p class="hint">If checked, you can input custom values for each die. Leave a field empty to use the rolled value.</p>
+            <div class="override-inputs"></div>
+        </fieldset>
     </div>
-</div>
+</form>

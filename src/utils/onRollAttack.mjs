@@ -61,7 +61,6 @@ export default async function onRollAttack(
   };
 
   for (const target of targetsActor) {
-    const targetAttributes = target.system.attributes;
     accuracyRollData = await requestRollModifier(accuracyRollData, true);
 
     //set is attack critic for maximize the damage later.
@@ -102,10 +101,10 @@ export default async function onRollAttack(
     if (!reactionKey) return;
     //If reaction selected was Block, Dodge or Parry calc the reactionRoll and ask if hit or not.
     if (["block", "parry", "dodge"].includes(reactionKey)) {
-      const attrID = targetAttributes[reactionKey]?.id;
+      const attrID = target.system.attributes[reactionKey]?.id;
       if (!attrID) {
         ui.notifications.error(
-          `${ETHERIA_CONST.moduleName} | Error executing Actor#rollAttack | The target ${target.name} does not have the attribute ${attrID}`
+          `${ETHERIA_CONST.moduleName} | Error executing Actor#rollAttack | The target ${target.name} does not have the attribute ${reactionKey}`
         );
         continue;
       }
