@@ -1,55 +1,43 @@
 {
-    "id": "etheria-prompt",
-    "title": "Etheria Prompt Module",
-    "description": "",
-    "version": "1.4.3",
-    "compatibility": {
-        "minimun": "11",
-        "verified": "11"
-    },
-    "authors": [
-        {
-            "name": "JoaquinP",
-            "url": "https://github.com/joaquinpereyra98",
-            "email": "joaquinpereyra98@gmail.com",
-            "discord": "joaquinp98"
-        }
-    ],
-    "url": "https://github.com/joaquinpereyra98/etheria-prompt",
-    "download": "https://github.com/joaquinpereyra98/etheria-prompt/releases/download/v1.4.3/etheria-prompt.zip",
-    "manifest": "https://raw.githubusercontent.com/joaquinpereyra98/etheria-prompt/main/module.json",
-    "socket": true,
-    "readme": "README.md",
-    "relationships": {
-        "systems": [
-            {
-                "id": "sandbox",
-                "compatibility": {
-                    "verified": "0.14.4.4"
-                }
-            }
-        ],
-        "requires": [],
-        "conflicts": []
-    },
-    "esmodules": [
-        "etheria-prompt.mjs"
-    ],
-    "styles": [
-        "etheria-prompt.css"
-    ],
-    "flags": {
-        "hotReload": {
-            "extensions": [
-                "css",
-                "hbs",
-                "json"
-            ],
-            "paths": [
-                "etheria-prompt.css",
-                "templates",
-                "lang"
-            ]
-        }
+  "id": "etheria-prompt",
+  "title": "Etheria Prompt Module",
+  "description": "",
+  "version": "1.5.0",
+  "compatibility": {
+    "minimun": "11",
+    "verified": "11"
+  },
+  "authors": [
+    {
+      "name": "JoaquinP",
+      "url": "https://github.com/joaquinpereyra98",
+      "email": "joaquinpereyra98@gmail.com",
+      "discord": "joaquinp98"
     }
+  ],
+  "url": "https://github.com/joaquinpereyra98/etheria-prompt",
+  "download": "https://github.com/joaquinpereyra98/etheria-prompt/releases/download/v1.5.0/etheria-prompt.zip",
+  "manifest": "https://raw.githubusercontent.com/joaquinpereyra98/etheria-prompt/main/module.json",
+  "socket": true,
+  "readme": "README.md",
+  "relationships": {
+    "systems": [
+      {
+        "id": "sandbox",
+        "compatibility": {
+          "verified": "0.14.4.4"
+        }
+      }
+    ],
+    "requires": [],
+    "conflicts": []
+  },
+  "esmodules": ["etheria-prompt.mjs"],
+  "styles": ["etheria-prompt.css"],
+  "flags": {
+    "hotReload": {
+      "extensions": ["css", "hbs", "json"],
+      "paths": ["etheria-prompt.css", "templates", "lang"]
+    }
+  }
 }
