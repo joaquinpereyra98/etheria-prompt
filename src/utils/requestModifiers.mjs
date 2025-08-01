@@ -62,29 +62,29 @@ export async function requestRollModifier(rollData, isAttackRoll = false) {
     },
     height: "auto",
     render: /** @param {JQuery} param0 */ ([html]) => {
-        const overrideDiv = html.querySelector(".override-inputs");
+      const overrideDiv = html.querySelector(".override-inputs");
 
-        renderOverrideInputs(overrideDiv, roll);
+      renderOverrideInputs(overrideDiv, roll);
 
-        html.querySelector("input[name=number]")?.addEventListener("change", (event) => {
-          const newCount = parseInt(event.target.value);
-          if (isNaN(newCount) || newCount < 1) return;
+      html.querySelector("input[name=number]")?.addEventListener("change", (event) => {
+        const newCount = parseInt(event.target.value);
+        if (isNaN(newCount) || newCount < 1) return;
 
-          const currentInputs = overrideDiv.querySelectorAll("input");
-          const diff = newCount - currentInputs.length;
+        const currentInputs = overrideDiv.querySelectorAll("input");
+        const diff = newCount - currentInputs.length;
 
-          if (diff > 0) {
-            for (let i = currentInputs.length; i < newCount; i++) {
-              overrideDiv.appendChild(createOverrideInput(`d${roll.dice[0].faces}`, 0, i));
-            }
-          } else {
-            for (let i = currentInputs.length - 1; i >= newCount; i--) {
-              currentInputs[i]?.closest(".override-die-wrapper")?.remove();
-            }
+        if (diff > 0) {
+          for (let i = currentInputs.length; i < newCount; i++) {
+            overrideDiv.appendChild(createOverrideInput(`d${roll.dice[0].faces}`, 0, i));
           }
-        });
+        } else {
+          for (let i = currentInputs.length - 1; i >= newCount; i--) {
+            currentInputs[i]?.closest(".override-die-wrapper")?.remove();
+          }
+        }
+      });
 
-      },
+    },
     rejectClose: false,
   });
 
@@ -99,8 +99,12 @@ export async function requestRollModifier(rollData, isAttackRoll = false) {
       if (!dieOverrides.length) return;
 
       for (let i = 0; i <= die.number - 1; i++) {
-        const val = dieOverrides.find(v => v.resultIdx === i).value || Math.ceil(CONFIG.Dice.randomUniform() * die.faces);
-        die.results.push({ result: val, active: true });;
+        const override = dieOverrides.find(v => v.resultIdx === i);
+        const value = override?.value;
+        const clamped = (typeof value === 'number')
+          ? Math.max(1, Math.min(value, die.faces))
+          : Math.ceil(CONFIG.Dice.randomUniform() * die.faces);
+        die.results.push({ result: clamped, active: true });
       }
 
       die._evaluateModifiers()
@@ -112,6 +116,7 @@ export async function requestRollModifier(rollData, isAttackRoll = false) {
   newRollData.dice = newRollData.roll.dice;
   newRollData.result = newRollData.roll.total;
   newRollData.iscrit = newRollData.dice[0].total === 20;
+  newRollData.isfumble = newRollData.dice[0].total === 1;
 
   return foundry.utils.mergeObject(rollData, newRollData);
 }
@@ -214,8 +219,12 @@ export async function requestDamageModifier(
       if (!dieOverrides.length) return;
 
       for (let i = 0; i <= die.number - 1; i++) {
-        const val = dieOverrides.find(v => v.resultIdx === i).value || Math.ceil(CONFIG.Dice.randomUniform() * die.faces);
-        die.results.push({ result: val, active: true });;
+        const override = dieOverrides.find(v => v.resultIdx === i);
+        const value = override?.value;
+        const clamped = (typeof value === 'number')
+          ? Math.max(1, Math.min(value, die.faces))
+          : Math.ceil(CONFIG.Dice.randomUniform() * die.faces);
+        die.results.push({ result: clamped, active: true });
       }
 
       die._evaluateModifiers()
